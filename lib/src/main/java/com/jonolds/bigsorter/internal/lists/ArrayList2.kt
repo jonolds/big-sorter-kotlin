@@ -1,4 +1,4 @@
-//package com.jonolds.bigsorter.internal.lists
+package com.jonolds.bigsorter.internal.lists
 //
 //import java.io.*
 //import java.util.*
@@ -688,7 +688,6 @@
 //	 * (each an `Object`) in the proper order.
 //	 */
 //	@Serial
-//	@Throws(IOException::class)
 //	private fun writeObject(s: ObjectOutputStream) {
 //		// Write out element count, and any hidden stuff
 //		val expectedModCount = modCount
@@ -712,7 +711,6 @@
 //	 * deserialize it).
 //	 */
 //	@Serial
-//	@Throws(IOException::class, ClassNotFoundException::class)
 //	private fun readObject(s: ObjectInputStream) {
 ////        elementData = EMPTY_ELEMENTDATA;
 ////

@@ -121,7 +121,7 @@ import java.util.function.UnaryOperator;
  * @since   1.2
  */
 
-public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAccess, Cloneable, java.io.Serializable {
+public class FastList<E> extends AbstractFastList<E> implements List<E>, RandomAccess, Cloneable, java.io.Serializable {
     @Serial
     private static final long serialVersionUID = 8683452581122892189L;
 
@@ -159,7 +159,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
      * @throws IllegalArgumentException if the specified initial capacity
      *         is negative
      */
-    public ArrayList(int initialCapacity) {
+    public FastList(int initialCapacity) {
         if (initialCapacity > 0) {
             this.elementData = new Object[initialCapacity];
         } else if (initialCapacity == 0) {
@@ -173,7 +173,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
     /**
      * Constructs an empty list with an initial capacity of ten.
      */
-    public ArrayList() {
+    public FastList() {
         this.elementData = DEFAULTCAPACITY_EMPTY_ELEMENTDATA;
     }
 
@@ -185,7 +185,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
      * @param c the collection whose elements are to be placed into this list
      * @throws NullPointerException if the specified collection is null
      */
-    public ArrayList(Collection<? extends E> c) {
+    public FastList(Collection<? extends E> c) {
         elementData = c.toArray();
         if ((size = elementData.length) != 0) {
             // c.toArray might (incorrectly) not return Object[] (see 6260652)
@@ -363,7 +363,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
      */
     public Object clone() {
         try {
-            ArrayList<?> v = (ArrayList<?>) super.clone();
+            FastList<?> v = (FastList<?>) super.clone();
             v.elementData = Arrays.copyOf(elementData, size);
             v.modCount = 0;
             return v;
@@ -879,7 +879,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
             int i = cursor;
             if (i >= size)
                 throw new NoSuchElementException();
-            Object[] elementData = ArrayList.this.elementData;
+            Object[] elementData = FastList.this.elementData;
             if (i >= elementData.length)
                 throw new ConcurrentModificationException();
             cursor = i + 1;
@@ -892,7 +892,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
             checkForComodification();
 
             try {
-                ArrayList.this.remove(lastRet);
+                FastList.this.remove(lastRet);
                 cursor = lastRet;
                 lastRet = -1;
                 expectedModCount = modCount;
@@ -905,12 +905,12 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
         @SuppressWarnings("unchecked")
         public void forEachRemaining(Consumer<? super E> consumer) {
             Objects.requireNonNull(consumer);
-            final int size = ArrayList.this.size;
+            final int size = FastList.this.size;
             int i = cursor;
             if (i >= size) {
                 return;
             }
-            final Object[] elementData = ArrayList.this.elementData;
+            final Object[] elementData = FastList.this.elementData;
             if (i >= elementData.length) {
                 throw new ConcurrentModificationException();
             }
@@ -956,7 +956,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
             int i = cursor - 1;
             if (i < 0)
                 throw new NoSuchElementException();
-            Object[] elementData = ArrayList.this.elementData;
+            Object[] elementData = FastList.this.elementData;
             if (i >= elementData.length)
                 throw new ConcurrentModificationException();
             cursor = i;
@@ -969,7 +969,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
             checkForComodification();
 
             try {
-                ArrayList.this.set(lastRet, e);
+                FastList.this.set(lastRet, e);
             } catch (IndexOutOfBoundsException ex) {
                 throw new ConcurrentModificationException();
             }
@@ -980,7 +980,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
 
             try {
                 int i = cursor;
-                ArrayList.this.add(i, e);
+                FastList.this.add(i, e);
                 cursor = i + 1;
                 lastRet = -1;
                 expectedModCount = modCount;
@@ -1035,33 +1035,33 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
                                                ") > toIndex(" + toIndex + ")");
     }
 
-    private class SubLest extends AbstractList<E> implements RandomAccess {
-        private final AbstractList<E> parent;
+    private class SubLest extends AbstractFastList<E> implements RandomAccess {
+        private final AbstractFastList<E> parent;
         private final int parentOffset;
         private final int offset;
         int size;
 
-        SubLest(AbstractList<E> parent,
+        SubLest(AbstractFastList<E> parent,
                 int offset, int fromIndex, int toIndex) {
             this.parent = parent;
             this.parentOffset = fromIndex;
             this.offset = offset + fromIndex;
             this.size = toIndex - fromIndex;
-            this.modCount = ArrayList.this.modCount;
+            this.modCount = FastList.this.modCount;
         }
 
         public E set(int index, E e) {
             rangeCheck(index);
             checkForComodification();
-            E oldValue = ArrayList.this.elementData(offset + index);
-            ArrayList.this.elementData[offset + index] = e;
+            E oldValue = FastList.this.elementData(offset + index);
+            FastList.this.elementData[offset + index] = e;
             return oldValue;
         }
 
         public E get(int index) {
             rangeCheck(index);
             checkForComodification();
-            return ArrayList.this.elementData(offset + index);
+            return FastList.this.elementData(offset + index);
         }
 
         public int size() {
@@ -1125,7 +1125,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
             return new ListIterator<E>() {
                 int cursor = index;
                 int lastRet = -1;
-                int expectedModCount = ArrayList.this.modCount;
+                int expectedModCount = FastList.this.modCount;
 
                 public boolean hasNext() {
                     return cursor != SubLest.this.size;
@@ -1137,7 +1137,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
                     int i = cursor;
                     if (i >= SubLest.this.size)
                         throw new NoSuchElementException();
-                    Object[] elementData = ArrayList.this.elementData;
+                    Object[] elementData = FastList.this.elementData;
                     if (offset + i >= elementData.length)
                         throw new ConcurrentModificationException();
                     cursor = i + 1;
@@ -1154,7 +1154,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
                     int i = cursor - 1;
                     if (i < 0)
                         throw new NoSuchElementException();
-                    Object[] elementData = ArrayList.this.elementData;
+                    Object[] elementData = FastList.this.elementData;
                     if (offset + i >= elementData.length)
                         throw new ConcurrentModificationException();
                     cursor = i;
@@ -1169,7 +1169,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
                     if (i >= size) {
                         return;
                     }
-                    final Object[] elementData = ArrayList.this.elementData;
+                    final Object[] elementData = FastList.this.elementData;
                     if (offset + i >= elementData.length) {
                         throw new ConcurrentModificationException();
                     }
@@ -1198,7 +1198,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
                         SubLest.this.remove(lastRet);
                         cursor = lastRet;
                         lastRet = -1;
-                        expectedModCount = ArrayList.this.modCount;
+                        expectedModCount = FastList.this.modCount;
                     } catch (IndexOutOfBoundsException ex) {
                         throw new ConcurrentModificationException();
                     }
@@ -1210,7 +1210,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
                     checkForComodification();
 
                     try {
-                        ArrayList.this.set(offset + lastRet, e);
+                        FastList.this.set(offset + lastRet, e);
                     } catch (IndexOutOfBoundsException ex) {
                         throw new ConcurrentModificationException();
                     }
@@ -1224,14 +1224,14 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
                         SubLest.this.add(i, e);
                         cursor = i + 1;
                         lastRet = -1;
-                        expectedModCount = ArrayList.this.modCount;
+                        expectedModCount = FastList.this.modCount;
                     } catch (IndexOutOfBoundsException ex) {
                         throw new ConcurrentModificationException();
                     }
                 }
 
-                final void checkForComodification() {
-                    if (expectedModCount != ArrayList.this.modCount)
+                void checkForComodification() {
+                    if (expectedModCount != FastList.this.modCount)
                         throw new ConcurrentModificationException();
                 }
             };
@@ -1258,13 +1258,13 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
         }
 
         private void checkForComodification() {
-            if (ArrayList.this.modCount != this.modCount)
+            if (FastList.this.modCount != this.modCount)
                 throw new ConcurrentModificationException();
         }
 
         public Spliterator<E> spliterator() {
             checkForComodification();
-            return new ArrayListSpliterator<>(ArrayList.this, offset,
+            return new ArrayListSpliterator<>(FastList.this, offset,
                     offset + this.size, this.modCount);
         }
     }
@@ -1337,13 +1337,13 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
          * these streamlinings.
          */
 
-        private final ArrayList<E> list;
+        private final FastList<E> list;
         private int index; // current index, modified on advance/split
         private int fence; // -1 until used; then one past last index
         private int expectedModCount; // initialized when fence set
 
         /** Create new spliterator covering the given  range */
-        ArrayListSpliterator(ArrayList<E> list, int origin, int fence,
+        ArrayListSpliterator(FastList<E> list, int origin, int fence,
                              int expectedModCount) {
             this.list = list; // OK if null unless traversed
             this.index = origin;
@@ -1353,7 +1353,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
 
         private int getFence() { // initialize fence to size on first use
             int hi; // (a specialized variant appears in method forEach)
-            ArrayList<E> lst;
+            FastList<E> lst;
             if ((hi = fence) < 0) {
                 if ((lst = list) == null)
                     hi = fence = 0;
@@ -1389,7 +1389,7 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
 
         public void forEachRemaining(Consumer<? super E> action) {
             int i, hi, mc; // hoist accesses and checks from loop
-            ArrayList<E> lst; Object[] a;
+            FastList<E> lst; Object[] a;
             if (action == null)
                 throw new NullPointerException();
             if ((lst = list) != null && (a = lst.elementData) != null) {

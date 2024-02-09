@@ -5,48 +5,23 @@ import java.io.InputStream
 
 class NonClosingInputStream(private val inStr: InputStream) : InputStream() {
 
-	@Throws(IOException::class)
-	override fun read(): Int {
-		return inStr.read()
-	}
+	override fun read(): Int = inStr.read()
 
-	@Throws(IOException::class)
-	override fun read(b: ByteArray): Int {
-		return inStr.read(b)
-	}
+	override fun read(b: ByteArray): Int = inStr.read(b)
 
-	@Throws(IOException::class)
-	override fun read(b: ByteArray, off: Int, len: Int): Int {
-		return inStr.read(b, off, len)
-	}
+	override fun read(b: ByteArray, off: Int, len: Int): Int = inStr.read(b, off, len)
 
-	@Throws(IOException::class)
-	override fun skip(n: Long): Long {
-		return inStr.skip(n)
-	}
+	override fun skip(n: Long): Long = inStr.skip(n)
 
-	@Throws(IOException::class)
-	override fun available(): Int {
-		return inStr.available()
-	}
+	override fun available(): Int = inStr.available()
 
-	@Throws(IOException::class)
-	override fun close() {
-		// don't close in
-	}
+	override fun close() { }
 
 	@Synchronized
-	override fun mark(readlimit: Int) {
-		inStr.mark(readlimit)
-	}
+	override fun mark(readlimit: Int) = inStr.mark(readlimit)
 
 	@Synchronized
-	@Throws(IOException::class)
-	override fun reset() {
-		inStr.reset()
-	}
+	override fun reset() = inStr.reset()
 
-	override fun markSupported(): Boolean {
-		return inStr.markSupported()
-	}
+	override fun markSupported(): Boolean = inStr.markSupported()
 }

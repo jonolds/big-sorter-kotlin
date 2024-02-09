@@ -72,12 +72,12 @@ import java.util.*;
  * @since 1.2
  */
 
-public abstract class AbstractList<E> extends AbstractCollection<E> implements List<E> {
+public abstract class AbstractFastList<E> extends AbstractCollection<E> implements List<E> {
     /**
      * Sole constructor.  (For invocation by subclass constructors, typically
      * implicit.)
      */
-    protected AbstractList() {
+    protected AbstractFastList() {
     }
 
     /**
@@ -378,7 +378,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
             checkForComodification();
 
             try {
-                AbstractList.this.remove(lastRet);
+                AbstractFastList.this.remove(lastRet);
                 if (lastRet < cursor)
                     cursor--;
                 lastRet = -1;
@@ -430,7 +430,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
             checkForComodification();
 
             try {
-                AbstractList.this.set(lastRet, e);
+                AbstractFastList.this.set(lastRet, e);
                 expectedModCount = modCount;
             } catch (IndexOutOfBoundsException ex) {
                 throw new ConcurrentModificationException();
@@ -442,7 +442,7 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
 
             try {
                 int i = cursor;
-                AbstractList.this.add(i, e);
+                AbstractFastList.this.add(i, e);
                 lastRet = -1;
                 cursor = i + 1;
                 expectedModCount = modCount;

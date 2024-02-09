@@ -2,9 +2,6 @@
 
 [versions]
 com-fasterxml-jackson-core-jackson-databind = "2.16.1"
-com-github-davidmoten-guava-mini = "0.1.7"
-com-github-davidmoten-hilbert-curve = "0.2.3"
-com-github-davidmoten-junit-extras = "0.4"
 junit-junit = "4.13.2"
 org-apache-commons-commons-csv = "1.10.0"
 org-openjdk-jmh-jmh-core = "1.37"
@@ -13,9 +10,6 @@ kotlin = "1.9.21"
 
 [libraries]
 com-fasterxml-jackson-core-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "com-fasterxml-jackson-core-jackson-databind" }
-com-github-davidmoten-guava-mini = { module = "com.github.davidmoten:guava-mini", version.ref = "com-github-davidmoten-guava-mini" }
-com-github-davidmoten-hilbert-curve = { module = "com.github.davidmoten:hilbert-curve", version.ref = "com-github-davidmoten-hilbert-curve" }
-com-github-davidmoten-junit-extras = { module = "com.github.davidmoten:junit-extras", version.ref = "com-github-davidmoten-junit-extras" }
 junit-junit = { module = "junit:junit", version.ref = "junit-junit" }
 org-apache-commons-commons-csv = { module = "org.apache.commons:commons-csv", version.ref = "org-apache-commons-commons-csv" }
 org-openjdk-jmh-jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "org-openjdk-jmh-jmh-core" }

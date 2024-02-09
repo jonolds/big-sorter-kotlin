@@ -2,9 +2,11 @@ package com.jonolds.bigsorter.internal
 
 import java.util.ConcurrentModificationException
 
-internal open class SubList<E>(list: AbstractList<E>, fromIndex: Int, toIndex: Int) : AbstractList<E>() {
-	private val l: AbstractList<E>
+internal open class SubList<E>(list: AbstractFastList<E>, fromIndex: Int, toIndex: Int) : AbstractFastList<E>() {
+
+	private val l: AbstractFastList<E>
 	private val offset: Int
+
 	override var size: Int = toIndex-fromIndex
 		get() {
 			checkForComodification()
@@ -14,10 +16,8 @@ internal open class SubList<E>(list: AbstractList<E>, fromIndex: Int, toIndex: I
 	init {
 		if (fromIndex < 0) throw IndexOutOfBoundsException("fromIndex = $fromIndex")
 		if (toIndex > list.size) throw IndexOutOfBoundsException("toIndex = $toIndex")
-		if (fromIndex > toIndex) throw IllegalArgumentException(
-			"fromIndex(" + fromIndex +
-				") > toIndex(" + toIndex + ")"
-		)
+		if (fromIndex > toIndex)
+			throw IllegalArgumentException("fromIndex($fromIndex) > toIndex($toIndex)")
 		l = list
 		offset = fromIndex
 		this.modCount = l.modCount
@@ -60,9 +60,7 @@ internal open class SubList<E>(list: AbstractList<E>, fromIndex: Int, toIndex: I
 		size -= (toIndex - fromIndex)
 	}
 
-	override fun addAll(elements: Collection<E>): Boolean {
-		return addAll(size, elements)
-	}
+	override fun addAll(elements: Collection<E>): Boolean = addAll(size, elements)
 
 	override fun addAll(index: Int, elements: Collection<E>): Boolean {
 		rangeCheckForAdd(index)
@@ -76,42 +74,32 @@ internal open class SubList<E>(list: AbstractList<E>, fromIndex: Int, toIndex: I
 		return true
 	}
 
-	override fun iterator(): MutableIterator<E> {
-		return listIterator()
-	}
+	override fun iterator(): MutableIterator<E> = listIterator()
 
 	override fun listIterator(index: Int): MutableListIterator<E> {
 		checkForComodification()
 		rangeCheckForAdd(index)
 
 		return object : MutableListIterator<E> {
+
 			private val i = l.listIterator(index + offset)
 
-			override fun hasNext(): Boolean {
-				return nextIndex() < size
-			}
+			override fun hasNext(): Boolean = nextIndex() < size
 
-			override fun next(): E {
-				if (hasNext()) return i.next()
+			override fun next(): E =
+				if (hasNext()) i.next()
 				else throw NoSuchElementException()
-			}
 
-			override fun hasPrevious(): Boolean {
-				return previousIndex() >= 0
-			}
+			override fun hasPrevious(): Boolean = previousIndex() >= 0
 
 			override fun previous(): E {
 				if (hasPrevious()) return i.previous()
 				else throw NoSuchElementException()
 			}
 
-			override fun nextIndex(): Int {
-				return i.nextIndex() - offset
-			}
+			override fun nextIndex(): Int = i.nextIndex() - offset
 
-			override fun previousIndex(): Int {
-				return i.previousIndex() - offset
-			}
+			override fun previousIndex(): Int = i.previousIndex() - offset
 
 			override fun remove() {
 				i.remove()
@@ -119,9 +107,7 @@ internal open class SubList<E>(list: AbstractList<E>, fromIndex: Int, toIndex: I
 				size--
 			}
 
-			override fun set(element: E) {
-				i.set(element)
-			}
+			override fun set(element: E) = i.set(element)
 
 			override fun add(element: E) {
 				i.add(element)
@@ -131,9 +117,7 @@ internal open class SubList<E>(list: AbstractList<E>, fromIndex: Int, toIndex: I
 		}
 	}
 
-	override fun subList(fromIndex: Int, toIndex: Int): MutableList<E> {
-		return SubList(this, fromIndex, toIndex)
-	}
+	override fun subList(fromIndex: Int, toIndex: Int): MutableList<E> = SubList(this, fromIndex, toIndex)
 
 	private fun rangeCheck(index: Int) {
 		if (index < 0 || index >= size) throw IndexOutOfBoundsException(outOfBoundsMsg(index))
@@ -143,9 +127,7 @@ internal open class SubList<E>(list: AbstractList<E>, fromIndex: Int, toIndex: I
 		if (index < 0 || index > size) throw IndexOutOfBoundsException(outOfBoundsMsg(index))
 	}
 
-	private fun outOfBoundsMsg(index: Int): String {
-		return "Index: $index, Size: $size"
-	}
+	private fun outOfBoundsMsg(index: Int): String = "Index: $index, Size: $size"
 
 	private fun checkForComodification() {
 		if (this.modCount != l.modCount) throw ConcurrentModificationException()

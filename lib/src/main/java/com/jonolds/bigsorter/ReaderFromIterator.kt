@@ -1,26 +1,22 @@
 package com.jonolds.bigsorter
 
-import com.github.davidmoten.guavamini.Preconditions
-import java.io.IOException
+import java.io.EOFException
 
-class ReaderFromIterator<T>(private var it: Iterator<T>?) : ReaderBS<T> {
+class ReaderFromIterator<T>(private var iter: Iterator<T>?) : ReaderBS<T> {
 
 
 	init {
-		Preconditions.checkNotNull(it)
+		checkNotNull(iter)
 	}
 
-	@Throws(IOException::class)
-	override fun read(): T? {
-		if (it == null || !it!!.hasNext()) {
-			// help gc
-			it = null
-			return null
-		} else {
-			return it!!.next()
+	override fun read(): T? =
+		if (iter == null || !iter!!.hasNext()) {
+			iter = null
+			null
 		}
-	}
+		else
+			iter!!.next()
 
-	@Throws(IOException::class)
+
 	override fun close() { }
 }

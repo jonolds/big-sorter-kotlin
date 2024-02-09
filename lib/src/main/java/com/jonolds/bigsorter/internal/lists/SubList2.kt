@@ -1,4 +1,4 @@
-//package com.jonolds.bigsorter.internal.lists
+package com.jonolds.bigsorter.internal.lists
 //
 //import java.util.ConcurrentModificationException
 //

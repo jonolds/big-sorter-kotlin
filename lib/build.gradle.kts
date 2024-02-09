@@ -19,16 +19,13 @@ dependencies {
     implementation(libs.kotlin.reflect)
 
 
-    api(libs.com.github.davidmoten.guava.mini)
     api(libs.org.apache.commons.commons.csv)
     api(libs.com.fasterxml.jackson.core.jackson.databind)
 
 
     testImplementation(libs.junit.junit)
-    testImplementation(libs.com.github.davidmoten.junit.extras)
     testImplementation(libs.org.openjdk.jmh.jmh.core)
     testImplementation(libs.org.openjdk.jmh.jmh.generator.annprocess)
-    testImplementation(libs.com.github.davidmoten.hilbert.curve)
 }
 
 group = "com.jonolds"
