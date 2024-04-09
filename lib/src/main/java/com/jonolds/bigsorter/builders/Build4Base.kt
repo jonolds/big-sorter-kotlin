@@ -3,7 +3,6 @@ package com.jonolds.bigsorter.builders
 import java.io.File
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
-import java.util.function.Consumer
 
 
 @Suppress("UNCHECKED_CAST")
@@ -42,7 +41,7 @@ open class Builder4Base<T, S: Builder4Base<T, S>>(val b: Builder<T>) {
 	}
 
 
-	fun logger(logger: Consumer<String>): S {
+	fun logger(logger: (String) -> Unit): S {
 		b.logger = logger
 		return this as S
 	}

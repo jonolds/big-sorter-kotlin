@@ -3,17 +3,16 @@ package com.jonolds.bigsorter.serializers
 import com.jonolds.bigsorter.ReaderBS
 import com.jonolds.bigsorter.WriterBS
 import java.io.*
-import java.util.function.Function
 
 
-abstract class DataSerializer<T> : SerializerBS<T> {
+abstract class DataSerializer<T> : StreamSerializer<T> {
 
 	abstract fun read(dis: DataInputStream): T?
 
 
 	abstract fun write(dos: DataOutputStream, value: T?)
 
-	override fun createReader(inStr: InputStream): ReaderBS<T> = object : ReaderBS<T> {
+	override fun createStreamReader(inStr: InputStream): ReaderBS<T> = object : ReaderBS<T> {
 
 		val dis: DataInputStream = DataInputStream(inStr)
 
@@ -28,27 +27,29 @@ abstract class DataSerializer<T> : SerializerBS<T> {
 	
 	
 
-	override fun createWriter(out: OutputStream): WriterBS<T> = object : WriterBS<T> {
+	override fun createStreamWriter(outStr: OutputStream): WriterBS<T> = object : WriterBS<T> {
 
-		val dos: DataOutputStream = DataOutputStream(out)
+		val dos: DataOutputStream = DataOutputStream(outStr)
 
-		override fun <S> map(mapper: Function<in S?, out T?>): WriterBS<S> {
+		override fun <S> mapper(mapper: (S?) -> T?): WriterBS<S> {
 
 			val tWriter: WriterBS<T> = this
 
 			return object : WriterBS<S> {
-				override fun close() = tWriter.close()
 
-				override fun write(value: S?) = tWriter.write(mapper.apply(value))
+				override fun write(value: S?) = tWriter.write(mapper(value))
 
 				override fun flush() = tWriter.flush()
+
+				override fun close() = tWriter.close()
+
 			}
 		}
 
 		override fun write(value: T?) = this@DataSerializer.write(dos, value)
 
-		override fun close() = dos.close()
-
 		override fun flush() = dos.flush()
+
+		override fun close() = dos.close()
 	}
 }

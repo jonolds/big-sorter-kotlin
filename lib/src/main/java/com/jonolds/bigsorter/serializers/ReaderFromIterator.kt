@@ -1,13 +1,9 @@
-package com.jonolds.bigsorter
+package com.jonolds.bigsorter.serializers
 
-import java.io.EOFException
+import com.jonolds.bigsorter.ReaderBS
 
 class ReaderFromIterator<T>(private var iter: Iterator<T>?) : ReaderBS<T> {
 
-
-	init {
-		checkNotNull(iter)
-	}
 
 	override fun read(): T? =
 		if (iter == null || !iter!!.hasNext()) {

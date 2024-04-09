@@ -9,10 +9,10 @@ import java.nio.charset.StandardCharsets
 internal class LinesSerializer(
 	private val charset: Charset,
 	private val delimiter: LineDelimiter
-) : SerializerBS<String> {
+) : StreamSerializer<String> {
 
 
-	override fun createReader(inStr: InputStream): ReaderBS<String> = object : ReaderBS<String> {
+	override fun createStreamReader(inStr: InputStream): ReaderBS<String> = object : ReaderBS<String> {
 		var br: BufferedReader = BufferedReader(InputStreamReader(inStr, charset))
 
 		override fun read(): String? = br.readLine()
@@ -20,9 +20,10 @@ internal class LinesSerializer(
 		override fun close() = br.close()
 	}
 
-	override fun createWriter(out: OutputStream): WriterBS<String> = object : WriterBS<String> {
+	override fun createStreamWriter(outStr: OutputStream): WriterBS<String> = object : WriterBS<String> {
 
-		var bw: BufferedWriter = BufferedWriter(OutputStreamWriter(out, charset))
+
+		var bw: BufferedWriter = BufferedWriter(OutputStreamWriter(outStr, charset))
 
 		override fun write(value: String?) {
 			value ?: return
@@ -30,10 +31,11 @@ internal class LinesSerializer(
 			bw.write(delimiter.value())
 		}
 
-		override fun close() = bw.close()
-
 		override fun flush() = bw.flush()
+
+		override fun close() = bw.close()
 	}
+
 
 	companion object {
         val LINES_UTF8_LF: SerializerBS<String> = LinesSerializer(StandardCharsets.UTF_8, LineDelimiter.LINE_FEED)

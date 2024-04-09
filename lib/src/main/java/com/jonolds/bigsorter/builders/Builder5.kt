@@ -1,7 +1,6 @@
 package com.jonolds.bigsorter.builders
 
-import com.jonolds.bigsorter.Sorter
-import com.jonolds.bigsorter.Util
+import com.jonolds.bigsorter.*
 import com.jonolds.bigsorter.Util.toRuntimeException
 import java.util.stream.Stream
 
@@ -26,9 +25,9 @@ class Builder5<T>(b: Builder<T>) : Builder4Base<T, Builder5<T>>(b) {
 		b.output = Util.nextTempFile(b.tempDirectory)
 
 		Sorter(
-			inputs = b.buildInputSuppliers(),
+			inputs = b.inputs,
 			serializer = b.serializer,
-			output = b.output!!,
+			output = FileWithElemCount(b.output!!.path),
 			comparator = b.comparator!!,
 			maxFilesPerMerge = b.maxFilesPerMerge,
 			maxItemsPerPart = b.maxItemsPerFile,
@@ -37,12 +36,11 @@ class Builder5<T>(b: Builder<T>) : Builder4Base<T, Builder5<T>>(b) {
 			tempDirectory = b.tempDirectory,
 			unique = b.unique,
 			initialSortInParallel = b.initialSortInParallel,
-			outputWriterFactory = b.outputWriterFactory
+			outputWriterFactory = b.outputWriterFactory,
 		).sort()
 
 		b.serializer
-			.createReaderFile(b.output!!)
-//			.createReaderFile(b.output!!)
+			.createFileReader(b.output!!, b.bufferSize)
 			.stream()
 			.onClose { b.output?.delete() }
 	} catch (e: Throwable) {
@@ -53,10 +51,10 @@ class Builder5<T>(b: Builder<T>) : Builder4Base<T, Builder5<T>>(b) {
 	fun sortBulk(): Stream<T?> = try {
 		b.output = Util.nextTempFile(b.tempDirectory)
 
-		Sorter(
-			inputs = b.buildInputSuppliers(),
+		SorterBulk(
+			inputs = b.inputs,
 			serializer = b.serializer,
-			output = b.output!!,
+			output = FileWithElemCount(b.output!!.path),
 			comparator = b.comparator!!,
 			maxFilesPerMerge = b.maxFilesPerMerge,
 			maxItemsPerPart = b.maxItemsPerFile,
@@ -65,11 +63,39 @@ class Builder5<T>(b: Builder<T>) : Builder4Base<T, Builder5<T>>(b) {
 			tempDirectory = b.tempDirectory,
 			unique = b.unique,
 			initialSortInParallel = b.initialSortInParallel,
-			outputWriterFactory = b.outputWriterFactory
-		).sortBulk()
+			outputWriterFactory = b.outputWriterFactory,
+		).sort()
 
 		b.serializer
-			.createReaderFile(b.output!!)
+			.createFileReader(b.output!!, b.bufferSize)
+			.stream()
+			.onClose { b.output?.delete() }
+	} catch (e: Throwable) {
+		b.output!!.delete()
+		throw toRuntimeException(e)
+	}
+
+
+	fun sortBulk2(): Stream<T?> = try {
+		b.output = Util.nextTempFile(b.tempDirectory)
+
+		SorterBulk2(
+			inputs = b.inputs,
+			serializer = b.serializer,
+			output = FileWithElemCount(b.output!!.path),
+			comparator = b.comparator!!,
+			maxFilesPerMerge = b.maxFilesPerMerge,
+			maxItemsPerPart = b.maxItemsPerFile,
+			log = b.logger,
+			bufferSize = b.bufferSize,
+			tempDirectory = b.tempDirectory,
+			unique = b.unique,
+			initialSortInParallel = b.initialSortInParallel,
+			outputWriterFactory = b.outputWriterFactory,
+		).sort()
+
+		b.serializer
+			.createFileReader(b.output!!, b.bufferSize)
 			.stream()
 			.onClose { b.output?.delete() }
 	} catch (e: Throwable) {

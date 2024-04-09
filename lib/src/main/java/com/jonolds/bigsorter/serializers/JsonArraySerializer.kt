@@ -7,13 +7,13 @@ import com.jonolds.bigsorter.ReaderBS
 import com.jonolds.bigsorter.WriterBS
 import java.io.*
 
-internal class JsonArraySerializer private constructor() : SerializerBS<ObjectNode?> {
+internal class JsonArraySerializer private constructor() : StreamSerializer<ObjectNode?> {
 
 
 	private val mapper = ObjectMapper()
 
 
-	override fun createReader(inStr: InputStream): ReaderBS<ObjectNode?> = try {
+	override fun createStreamReader(inStr: InputStream): ReaderBS<ObjectNode?> = try {
 
 		val parser = mapper.factory.createParser(inStr)
 		check(parser.nextToken() == JsonToken.START_ARRAY) { "Expected an array" }
@@ -39,8 +39,8 @@ internal class JsonArraySerializer private constructor() : SerializerBS<ObjectNo
 		throw UncheckedIOException(e)
 	}
 
-	override fun createWriter(out: OutputStream): WriterBS<ObjectNode?> {
-		val w: Writer = OutputStreamWriter(out)
+	override fun createStreamWriter(outStr: OutputStream): WriterBS<ObjectNode?> {
+		val w: Writer = OutputStreamWriter(outStr)
 
 		return object : WriterBS<ObjectNode?> {
 			var first: Boolean = true

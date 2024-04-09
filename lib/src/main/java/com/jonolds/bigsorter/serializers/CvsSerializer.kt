@@ -5,15 +5,17 @@ import com.jonolds.bigsorter.WriterBS
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
 import org.apache.commons.csv.CSVRecord
-import java.io.*
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.io.OutputStream
+import java.io.PrintStream
 import java.nio.charset.Charset
-import java.util.function.Function
 
 
-internal class CsvSerializer(private val format: CSVFormat, private val charset: Charset) : SerializerBS<CSVRecord> {
+internal class CsvSerializer(private val format: CSVFormat, private val charset: Charset) : StreamSerializer<CSVRecord> {
 
 
-	override fun createReader(inStr: InputStream): ReaderBS<CSVRecord> = object : ReaderBS<CSVRecord> {
+	override fun createStreamReader(inStr: InputStream): ReaderBS<CSVRecord> = object : ReaderBS<CSVRecord> {
 		var iter: Iterator<CSVRecord>? = null
 		var isr: InputStreamReader? = null
 
@@ -28,7 +30,7 @@ internal class CsvSerializer(private val format: CSVFormat, private val charset:
 		override fun close() = isr?.close() ?: Unit
 	}
 
-	override fun createWriter(out: OutputStream): WriterBS<CSVRecord> = object : WriterBS<CSVRecord> {
+	override fun createStreamWriter(outStr: OutputStream): WriterBS<CSVRecord> = object : WriterBS<CSVRecord> {
 
 		var printer: CSVPrinter? = null
 		private var ps: PrintStream? = null
@@ -37,7 +39,7 @@ internal class CsvSerializer(private val format: CSVFormat, private val charset:
 		override fun write(value: CSVRecord?) {
 			value ?: return
 			if (printer == null) {
-				ps = PrintStream(out, false, charset)
+				ps = PrintStream(outStr, false, charset)
 				printer = format.print(ps)
 				// print header line
 				val h = value.parser.headerNames
@@ -48,18 +50,22 @@ internal class CsvSerializer(private val format: CSVFormat, private val charset:
 		}
 
 
-		override fun <S> map(mapper: Function<in S?, out CSVRecord?>): WriterBS<S> = this.let { tWriter ->
+		override fun <S> mapper(mapper: (S?) -> CSVRecord?): WriterBS<S> = this.let { tWriter ->
 			object : WriterBS<S> {
-				override fun close() = tWriter.close()
 
-				override fun write(value: S?) = tWriter.write(mapper.apply(value))
+				override fun write(value: S?) = tWriter.write(mapper(value))
 
 				override fun flush() = tWriter.flush()
+
+				override fun close() = tWriter.close()
 			}
 		}
 
-		override fun close() = flush()
-
 		override fun flush() = ps?.flush() ?: Unit
+
+		override fun close() {
+			flush()
+			ps?.close()
+		}
 	}
 }

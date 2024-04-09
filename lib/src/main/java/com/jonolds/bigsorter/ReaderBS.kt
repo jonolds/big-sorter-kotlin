@@ -1,16 +1,13 @@
 package com.jonolds.bigsorter
 
-import com.jonolds.bigsorter.Util.close
+import com.jonolds.bigsorter.internal.Array2
+import com.jonolds.bigsorter.internal.FixedArray
 import java.io.Closeable
-import java.io.EOFException
 import java.io.IOException
 import java.io.UncheckedIOException
 import java.util.*
-import java.util.function.Function
-import java.util.function.Predicate
 import java.util.stream.Stream
 import java.util.stream.StreamSupport
-import kotlin.NoSuchElementException
 
 
 interface ReaderBS<T> : Closeable, Iterable<T> {
@@ -24,22 +21,33 @@ interface ReaderBS<T> : Closeable, Iterable<T> {
 	fun read(): T?
 
 
-	fun readUnsafe(): T = try {
-		read()!!
-	} catch (e: Exception) {
-		throw EOFException()
-	}
-
-	fun readAtMost(limit: Int, result: MutableList<T>): Int {
+	fun readBulk(limit: Int, result: MutableList<in T>): Int {
 		var count = 0
-		var t = read()
-		while (t != null) {
+		while (count < limit) {
+
+			val t = read() ?: break
 			result.add(t)
 			count++
-			t = read()
 		}
 		return count
 	}
+
+
+	fun readBulkArray(limit: Int, result: Array2<T>): Array2<T> {
+
+		TODO("Not yet implemented")
+	}
+
+
+	fun <S> readBulkArray(limit: Int, result: Array2<S>, mapper: (T) -> S): Array2<S> {
+
+		TODO("Not yet implemented")
+	}
+
+	fun readFixedArray(limit: Int, result: FixedArray, resultMapper: (src: ByteArray, srcStart: Int, srcEnd: Int, dst: ByteArray, dstStart: Int, dstLen: Int) -> Unit): FixedArray {
+		TODO("Not yet implemented")
+	}
+
 
 	/**
 	 * Returns the next read value. If no more values close() is called then null
@@ -53,80 +61,38 @@ interface ReaderBS<T> : Closeable, Iterable<T> {
 		null
 	}
 
-	fun filter(predicate: Predicate<in T>): ReaderBS<T> {
-		val r = this
 
-		return object : ReaderBS<T> {
+	fun <S> mapper(mapper: (T) -> S): ReaderBS<S> {
 
-			override fun read(): T? {
-				var t = r.read()
-				while (t != null && !predicate.test(t))
-					t = r.read()
-				return t
-			}
-
-
-			override fun close() = r.close()
-		}
-	}
-
-	fun <S> map(mapper: Function<in T, out S>): ReaderBS<S> {
-
-		val r = this
+		val tReader = this
 
 		return object : ReaderBS<S> {
 
 
 			override fun read(): S? {
-				val v = r.read()
-				return if (v == null) null else mapper.apply(v)
+				val t = tReader.read()
+				return if (t == null) null else mapper(t)
 			}
 
-			override fun close() = r.close()
-		}
-	}
+			override fun readBulk(limit: Int, result: MutableList<in S>): Int {
+				val newResult = ArrayList<T>(limit)
+				val count = tReader.readBulk(limit, newResult)
 
-	fun flatMap(mapper: Function<in T, out List<T>>): ReaderBS<T> {
-
-		val r = this
-
-		return object : ReaderBS<T> {
-
-			var list: List<T>? = null
-			var index: Int = 0
-
-			override fun read(): T? {
-
-				while (list == null || index == list!!.size) {
-					val t: T? = r.read()
-					if (t == null)
-						return null
-					else {
-						list = mapper.apply(t)
-						index = 0
-					}
-				}
-
-				return list!![index++]
+				result.addAll(newResult.map { mapper(it) })
+				return count
 			}
 
-			override fun close() = r.close()
+
+			override fun readBulkArray(limit: Int, result: Array2<S>): Array2<S> {
+				tReader.readBulkArray(limit, result, mapper)
+				return result
+			}
+
+			override fun close() = tReader.close()
 		}
 	}
 
-	fun transform(function: Function<in Stream<T>, out Stream<out T>>): ReaderBS<T> {
 
-		val s = function.apply(stream())
-
-		return object : ReaderBS<T> {
-
-			val iter: Iterator<T> = s.iterator()
-
-			override fun read(): T? = if (iter.hasNext()) iter.next() else null
-
-			override fun close() = s.close()
-		}
-	}
 
 	override fun iterator(): Iterator<T> = object : Iterator<T> {
 
@@ -160,5 +126,6 @@ interface ReaderBS<T> : Closeable, Iterable<T> {
 	}
 
 	fun stream(): Stream<T> = StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator(), Spliterator.ORDERED), false)
-			.onClose { close(this@ReaderBS) }
+			.onClose { this@ReaderBS.close() }
 }
+

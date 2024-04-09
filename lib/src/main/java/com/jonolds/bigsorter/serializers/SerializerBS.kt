@@ -1,10 +1,7 @@
 package com.jonolds.bigsorter.serializers
 
 import com.fasterxml.jackson.databind.node.ObjectNode
-import com.jonolds.bigsorter.BiConsumerBS
-import com.jonolds.bigsorter.FunctionBS
-import com.jonolds.bigsorter.InputStreamReaderFactory
-import com.jonolds.bigsorter.OutputStreamWriterFactory
+import com.jonolds.bigsorter.*
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVRecord
 import java.io.DataInputStream
@@ -14,8 +11,11 @@ import java.io.Serializable
 import java.nio.charset.Charset
 
 
-interface SerializerBS<T> : InputStreamReaderFactory<T>, OutputStreamWriterFactory<T> {
+interface SerializerBS<T> : ReaderFactory<T>, WriterFactory<T> {
 
+
+	fun makeArray(size: Int): Array<T> =
+		TODO("Not yet implemented")
 
 	companion object {
 
@@ -39,12 +39,12 @@ interface SerializerBS<T> : InputStreamReaderFactory<T>, OutputStreamWriterFacto
 		fun jsonArray(): SerializerBS<ObjectNode?> = JsonArraySerializer.INSTANCE
 
 		fun <T> dataSerializer2(
-			reader: FunctionBS<in DataInputStream, out T>,
-			writer: BiConsumerBS<in DataOutputStream, in T>
+			reader: (DataInputStream) -> T,
+			writer: (DataOutputStream, T) -> Unit
 		): SerializerBS<T> = object : DataSerializer<T>() {
 
 			override fun read(dis: DataInputStream): T? = try {
-				reader.apply(dis)
+				reader(dis)
 			} catch (e: EOFException) {
 				null
 			} catch (e: Exception) {
@@ -52,10 +52,22 @@ interface SerializerBS<T> : InputStreamReaderFactory<T>, OutputStreamWriterFacto
 			}
 
 			override fun write(dos: DataOutputStream, value: T?): Unit = try {
-				value?.let { writer.accept(dos, it) } ?: Unit
+				value?.let { writer.invoke(dos, it) } ?: Unit
 			} catch (e: Exception) {
 				throw RuntimeException(e)
 			}
 		}
 	}
 }
+
+abstract class SerializerAbstract<T>(
+
+): SerializerBS<T> {
+
+}
+
+
+interface StreamSerializer<T>: SerializerBS<T>, StreamReaderFactory<T>, StreamWriterFactory<T>
+
+
+interface ChannelSerializer<T>: SerializerBS<T>, ChannelReaderFactory<T>, ChannelWriterFactory<T>

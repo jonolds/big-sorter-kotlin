@@ -1,24 +1,22 @@
 package com.jonolds.bigsorter.builders
 
-import com.jonolds.bigsorter.OutputStreamWriterFactory
-import com.jonolds.bigsorter.Sorter
+import com.jonolds.bigsorter.*
 import java.io.IOException
 import java.io.UncheckedIOException
 import java.util.*
-import java.util.function.Function
 
 
 class Builder4<T>(b: Builder<T>) : Builder4Base<T, Builder4<T>>(b) {
 
 	fun <S> outputMapper(
-		writerFactory: OutputStreamWriterFactory<S>,
-		mapper: Function<in T?, out S?>
+		writerFactory: WriterFactory<S>,
+		mapper: (T?) -> S?
 	): Builder4<T> {
 		check(b.outputWriterFactory.isEmpty)
-		val factory = OutputStreamWriterFactory { out -> writerFactory.createWriter(out).map(mapper) }
-		b.outputWriterFactory = Optional.of(factory)
+		b.outputWriterFactory = Optional.of(writerFactory.mapper(mapper))
 		return this
 	}
+
 
 
 	// TODO add flatMap method, stream transforms?
@@ -29,9 +27,9 @@ class Builder4<T>(b: Builder<T>) : Builder4Base<T, Builder4<T>>(b) {
 	 */
 	fun sort() = try {
 		Sorter(
-			inputs = b.buildInputSuppliers(),
+			inputs = b.inputs,
 			serializer = b.serializer,
-			output = b.output!!,
+			output = FileWithElemCount(b.output!!.path),
 			comparator = b.comparator!!,
 			maxFilesPerMerge = b.maxFilesPerMerge,
 			maxItemsPerPart = b.maxItemsPerFile,
@@ -40,7 +38,7 @@ class Builder4<T>(b: Builder<T>) : Builder4Base<T, Builder4<T>>(b) {
 			tempDirectory = b.tempDirectory,
 			unique = b.unique,
 			initialSortInParallel = b.initialSortInParallel,
-			outputWriterFactory = b.outputWriterFactory
+			outputWriterFactory = b.outputWriterFactory,
 		).sort()
 	} catch (e: IOException) {
 		b.output?.delete()
@@ -49,10 +47,10 @@ class Builder4<T>(b: Builder<T>) : Builder4Base<T, Builder4<T>>(b) {
 
 
 	fun sortBulk() = try {
-		Sorter(
-			inputs = b.buildInputSuppliers(),
+		SorterBulk(
+			inputs = b.inputs,
 			serializer = b.serializer,
-			output = b.output!!,
+			output = FileWithElemCount(b.output!!.path),
 			comparator = b.comparator!!,
 			maxFilesPerMerge = b.maxFilesPerMerge,
 			maxItemsPerPart = b.maxItemsPerFile,
@@ -61,8 +59,29 @@ class Builder4<T>(b: Builder<T>) : Builder4Base<T, Builder4<T>>(b) {
 			tempDirectory = b.tempDirectory,
 			unique = b.unique,
 			initialSortInParallel = b.initialSortInParallel,
-			outputWriterFactory = b.outputWriterFactory
-		).sortBulk()
+			outputWriterFactory = b.outputWriterFactory,
+		).sort()
+	} catch (e: IOException) {
+		b.output?.delete()
+		throw UncheckedIOException(e)
+	}
+
+
+	fun sortBulk2() = try {
+		SorterBulk2(
+			inputs = b.inputs,
+			serializer = b.serializer,
+			output = FileWithElemCount(b.output!!.path),
+			comparator = b.comparator!!,
+			maxFilesPerMerge = b.maxFilesPerMerge,
+			maxItemsPerPart = b.maxItemsPerFile,
+			log = b.logger,
+			bufferSize = b.bufferSize,
+			tempDirectory = b.tempDirectory,
+			unique = b.unique,
+			initialSortInParallel = b.initialSortInParallel,
+			outputWriterFactory = b.outputWriterFactory,
+		).sort()
 	} catch (e: IOException) {
 		b.output?.delete()
 		throw UncheckedIOException(e)

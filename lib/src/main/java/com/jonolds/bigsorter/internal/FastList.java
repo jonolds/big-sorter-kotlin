@@ -1,33 +1,13 @@
 /*
  * Copyright (c) 1997, 2017, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
  */
 
 package com.jonolds.bigsorter.internal;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.Serial;
+import java.io.*;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
@@ -121,7 +101,8 @@ import java.util.function.UnaryOperator;
  * @since   1.2
  */
 
-public class FastList<E> extends AbstractFastList<E> implements List<E>, RandomAccess, Cloneable, java.io.Serializable {
+@SuppressWarnings({"SuspiciousSystemArraycopy", "unchecked"})
+public class FastList<E> extends AbstractFastList<E> implements List<E>, RandomAccess, Cloneable, Serializable {
     @Serial
     private static final long serialVersionUID = 8683452581122892189L;
 
@@ -430,7 +411,6 @@ public class FastList<E> extends AbstractFastList<E> implements List<E>, RandomA
 
     // Positional Access Operations
 
-    @SuppressWarnings("unchecked")
     E elementData(int index) {
         return (E) elementData[index];
     }
@@ -766,8 +746,8 @@ public class FastList<E> extends AbstractFastList<E> implements List<E>, RandomA
      *             (each an <code>Object</code>) in the proper order.
      */
     @Serial
-    private void writeObject(java.io.ObjectOutputStream s)
-        throws java.io.IOException{
+    private void writeObject(ObjectOutputStream s)
+        throws IOException {
         // Write out element count, and any hidden stuff
         int expectedModCount = modCount;
         s.defaultWriteObject();
@@ -790,8 +770,8 @@ public class FastList<E> extends AbstractFastList<E> implements List<E>, RandomA
      * deserialize it).
      */
     @Serial
-    private void readObject(java.io.ObjectInputStream s)
-        throws java.io.IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream s)
+        throws IOException, ClassNotFoundException {
 //        elementData = EMPTY_ELEMENTDATA;
 //
 //        // Read in size, and any hidden stuff
@@ -1454,9 +1434,6 @@ public class FastList<E> extends AbstractFastList<E> implements List<E>, RandomA
                 elementData[k] = null;  // Let gc do its work
             }
             this.size = newSize;
-            if (modCount != expectedModCount) {
-                throw new ConcurrentModificationException();
-            }
             modCount++;
         }
 
@@ -1481,21 +1458,13 @@ public class FastList<E> extends AbstractFastList<E> implements List<E>, RandomA
     @Override
     @SuppressWarnings("unchecked")
     public void sort(Comparator<? super E> c) {
-        final int expectedModCount = modCount;
         Arrays.sort((E[]) elementData, 0, size, c);
-        if (modCount != expectedModCount) {
-            throw new ConcurrentModificationException();
-        }
         modCount++;
     }
-    
-    @SuppressWarnings("unchecked")
+
+
     public void parallelSort(Comparator<? super E> c) {
-        final int expectedModCount = modCount;
         Arrays.parallelSort((E[]) elementData, 0, size, c);
-        if (modCount != expectedModCount) {
-            throw new ConcurrentModificationException();
-        }
         modCount++;
     }
 }

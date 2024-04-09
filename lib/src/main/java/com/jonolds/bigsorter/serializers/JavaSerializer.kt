@@ -5,9 +5,9 @@ import com.jonolds.bigsorter.WriterBS
 import java.io.*
 
 @Suppress("UNCHECKED_CAST")
-internal class JavaSerializer<T : Serializable?> : SerializerBS<T> {
+internal class JavaSerializer<T : Serializable?> : StreamSerializer<T> {
 
-	override fun createReader(inStr: InputStream): ReaderBS<T> {
+	override fun createStreamReader(inStr: InputStream): ReaderBS<T> {
 		val ois = ObjectInputStream(inStr)
 
 		return object : ReaderBS<T> {
@@ -25,15 +25,18 @@ internal class JavaSerializer<T : Serializable?> : SerializerBS<T> {
 	}
 
 
-	override fun createWriter(out: OutputStream): WriterBS<T> {
-		val oos = ObjectOutputStream(out)
+	override fun createStreamWriter(outStr: OutputStream): WriterBS<T> {
+		val oos = ObjectOutputStream(outStr)
+
 
 		return object : WriterBS<T> {
+
 			override fun write(value: T?) = oos.writeObject(value)
+
+			override fun flush() = oos.flush()
 
 			override fun close() = oos.close()
 
-			override fun flush() = oos.flush()
 		}
 	}
 
