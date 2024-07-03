@@ -34,20 +34,13 @@ interface ReaderBS<T> : Closeable, Iterable<T> {
 
 
 	fun readBulkArray(limit: Int, result: Array2<T>): Array2<T> {
-
 		TODO("Not yet implemented")
 	}
 
 
 	fun <S> readBulkArray(limit: Int, result: Array2<S>, mapper: (T) -> S): Array2<S> {
-
 		TODO("Not yet implemented")
 	}
-
-	fun readFixedArray(limit: Int, result: FixedArray, resultMapper: (src: ByteArray, srcStart: Int, srcEnd: Int, dst: ByteArray, dstStart: Int, dstLen: Int) -> Unit): FixedArray {
-		TODO("Not yet implemented")
-	}
-
 
 	/**
 	 * Returns the next read value. If no more values close() is called then null
@@ -91,7 +84,6 @@ interface ReaderBS<T> : Closeable, Iterable<T> {
 			override fun close() = tReader.close()
 		}
 	}
-
 
 
 	override fun iterator(): Iterator<T> = object : Iterator<T> {

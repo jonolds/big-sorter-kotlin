@@ -77,8 +77,7 @@ public abstract class AbstractFastList<E> extends AbstractCollection<E> implemen
      * Sole constructor.  (For invocation by subclass constructors, typically
      * implicit.)
      */
-    protected AbstractFastList() {
-    }
+    protected AbstractFastList() { }
 
     /**
      * Appends the specified element to the end of this list (optional

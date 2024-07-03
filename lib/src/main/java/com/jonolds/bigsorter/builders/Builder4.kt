@@ -9,7 +9,7 @@ import java.util.*
 class Builder4<T>(b: Builder<T>) : Builder4Base<T, Builder4<T>>(b) {
 
 	fun <S> outputMapper(
-		writerFactory: WriterFactory<S>,
+		writerFactory: FileWriterFactory<S>,
 		mapper: (T?) -> S?
 	): Builder4<T> {
 		check(b.outputWriterFactory.isEmpty)

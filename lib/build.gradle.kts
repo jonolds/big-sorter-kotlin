@@ -1,5 +1,5 @@
 plugins {
-    id("org.jetbrains.kotlin.jvm") version libs.versions.kotlin
+    id("org.jetbrains.kotlin.jvm") version "2.0.0"
     id("java-library")
     id("maven-publish")
 }
@@ -15,17 +15,25 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.kotlin.stdlib)
-    implementation(libs.kotlin.reflect)
+
+    val commons_csv_version = "1.10.0"
+    val jackson_version = "2.17.0"
+    val junit_version = "4.13.2"
+    val kotlin_version = "2.0.0"
+    val openjdk_version = "1.37"
+
+//    api("com.fasterxml.jackson.core:jackson-databind:$jackson_version")
+
+    api("org.apache.commons:commons-csv:$commons_csv_version")
+
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
 
 
-    api(libs.org.apache.commons.commons.csv)
-    api(libs.com.fasterxml.jackson.core.jackson.databind)
+    testImplementation("junit:junit:$junit_version")
+    testImplementation("org.openjdk.jmh:jmh-core:$openjdk_version")
+    testImplementation("org.openjdk.jmh:jmh-generator-annprocess:$openjdk_version")
 
-
-    testImplementation(libs.junit.junit)
-    testImplementation(libs.org.openjdk.jmh.jmh.core)
-    testImplementation(libs.org.openjdk.jmh.jmh.generator.annprocess)
 }
 
 group = "com.jonolds"

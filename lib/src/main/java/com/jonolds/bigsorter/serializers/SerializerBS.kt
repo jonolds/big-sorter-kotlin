@@ -1,6 +1,5 @@
 package com.jonolds.bigsorter.serializers
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.jonolds.bigsorter.*
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVRecord
@@ -11,8 +10,7 @@ import java.io.Serializable
 import java.nio.charset.Charset
 
 
-interface SerializerBS<T> : ReaderFactory<T>, WriterFactory<T> {
-
+interface SerializerBS<T> : FileReaderFactory<T>, FileWriterFactory<T> {
 
 	fun makeArray(size: Int): Array<T> =
 		TODO("Not yet implemented")
@@ -36,7 +34,7 @@ interface SerializerBS<T> : ReaderFactory<T>, WriterFactory<T> {
 
 		fun csv(format: CSVFormat, charset: Charset): SerializerBS<CSVRecord> = CsvSerializer(format, charset)
 
-		fun jsonArray(): SerializerBS<ObjectNode?> = JsonArraySerializer.INSTANCE
+//		fun jsonArray(): SerializerBS<ObjectNode?> = JsonArraySerializer.INSTANCE
 
 		fun <T> dataSerializer2(
 			reader: (DataInputStream) -> T,
@@ -58,12 +56,6 @@ interface SerializerBS<T> : ReaderFactory<T>, WriterFactory<T> {
 			}
 		}
 	}
-}
-
-abstract class SerializerAbstract<T>(
-
-): SerializerBS<T> {
-
 }
 
 

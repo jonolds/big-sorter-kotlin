@@ -1,8 +1,7 @@
 package com.jonolds.bigsorter.builders
 
+import com.jonolds.bigsorter.FileWriterFactory
 import com.jonolds.bigsorter.ReaderBS
-import com.jonolds.bigsorter.ReaderFactory
-import com.jonolds.bigsorter.WriterFactory
 import com.jonolds.bigsorter.serializers.SerializerBS
 import java.io.File
 import java.time.format.DateTimeFormatter
@@ -24,7 +23,7 @@ class Builder<T>(val serializer: SerializerBS<T>) {
 	var transform: (ReaderBS<T>) -> ReaderBS<out T> = { it }
 	var unique: Boolean = false
 	var initialSortInParallel: Boolean = false
-	var outputWriterFactory: Optional<WriterFactory<T?>> = Optional.empty()
+	var outputWriterFactory: Optional<FileWriterFactory<T?>> = Optional.empty()
 
 
 	fun tempDirectory(tempDirectory: File): Builder<T> {

@@ -6,10 +6,10 @@ import kotlin.io.path.pathString
 
 
 class InputTransform<T, out R>(
-	val readerFactory: ReaderFactory<T>,
+	val readerFactory: FileReaderFactory<T>,
 	val mapper: (T) -> R
 ) {
-	fun transformed(): ReaderFactory<out R> = readerFactory.mapper(mapper)
+	fun transformed(): FileReaderFactory<out R> = readerFactory.mapper(mapper)
 }
 
 

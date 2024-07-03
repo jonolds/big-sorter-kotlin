@@ -25,7 +25,7 @@ class SorterBulk2<T>(
 	val tempDirectory: File,
 	val unique: Boolean,
 	val initialSortInParallel: Boolean,
-	val outputWriterFactory: Optional<WriterFactory<T?>>,
+	val outputWriterFactory: Optional<FileWriterFactory<T?>>,
 ) {
 
 	var count: Long = 0
@@ -43,7 +43,6 @@ class SorterBulk2<T>(
 
 		tempDirectory.mkdirs()
 
-		count = 0
 		val sortedFiles: MutableList<FileWithElemCount>
 
 		val timeFirstSort = measureTime {
@@ -76,16 +75,13 @@ class SorterBulk2<T>(
 		log("unique = $unique")
 
 
-
 		val list = Array2(serializer.makeArray(maxItemsPerPart))
-
 
 
 		var currentCount = 0
 
 		for (supplier in inputs!!) {
 			supplier().use { reader ->
-
 				reader as ReaderBS<T>
 
 				reader.readBulkArray(maxItemsPerPart-currentCount, list)
@@ -171,7 +167,7 @@ class SorterBulk2<T>(
 					q.offer(state)
 				else {
 					state.reader.close()
-					state.delete() // delete intermediate files
+//					state.delete() // delete intermediate files
 				}
 			}
 		}
@@ -200,6 +196,7 @@ class SorterBulk2<T>(
 		log("total=%s, sorted %s records to file %s in %ss", count, list.size, file.name, time)
 		return file
 	}
+
 
 
 	private fun writeToFileBulk(list: Array2<T>, f: FileWithElemCount) = serializer.createFileWriter(f, bufferSize).use { writer ->

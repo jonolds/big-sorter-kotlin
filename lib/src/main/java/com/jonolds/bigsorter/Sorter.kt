@@ -35,7 +35,7 @@ class Sorter<T>(
 	val tempDirectory: File,
 	val unique: Boolean,
 	val initialSortInParallel: Boolean,
-	val outputWriterFactory: Optional<WriterFactory<T?>>,
+	val outputWriterFactory: Optional<FileWriterFactory<T?>>,
 ) {
 
 	var count: Long = 0

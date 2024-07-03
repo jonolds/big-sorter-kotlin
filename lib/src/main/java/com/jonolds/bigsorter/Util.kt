@@ -29,6 +29,8 @@ object Util {
 		return this
 	}
 
+	fun File.nullIfNotNormalFile(): File? = if (isFile) this else null
+
 
 	fun FileWithElemCount.createOrReplaceWithCount(): FileWithElemCount {
 		if (exists())
@@ -67,9 +69,9 @@ object Util {
 
 	fun <S, T> convert(
 		input: File,
-		readerFactory: ReaderFactory<S>,
+		readerFactory: FileReaderFactory<S>,
 		out: File,
-		writerFactory: WriterFactory<T>,
+		writerFactory: FileWriterFactory<T>,
 		bufferSize: Int = 8192,
 		mapper: (S?) -> T?,
 	) = try {
