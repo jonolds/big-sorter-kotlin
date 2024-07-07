@@ -22,8 +22,16 @@ class SorterPhase<T> constructor(
     val comparator: Comparator<in T>,
     var namedOutputPath: String? = null,
     inputContext: DatMapContext? = null,
-    val clazz: Class<T>
-) : DualBoundaryPhase<T, T>(), FileSourcePhase<T> {
+) : DualBoundaryPhase<T, T>, FileSourcePhase<T> {
+
+
+    override val receiverClass: Class<T> = serializer.clazz
+
+    override val senderClass: Class<T> get() = receiverClass
+
+    override var child: Receiver<T>? = null
+
+    override var tag: String? = null
 
     var unique: Boolean = true
     var initialSortInParallel: Boolean = true
@@ -43,6 +51,9 @@ class SorterPhase<T> constructor(
 
     override fun getWriter(): MiniWriter<T> = object : MiniWriter<T>() {
 
+        override val receiverClass: Class<T> = this@SorterPhase.receiverClass
+
+
         val sortedFiles: MutableList<FileWithElemCount> = ArrayList(500)
 
         init {
@@ -56,7 +67,7 @@ class SorterPhase<T> constructor(
 
 
         override fun writeBulk(list: List<T>) {
-            val list2 = if (list is FastArrayList<*>) list else FastArrayList(list, clazz)
+            val list2 = if (list is FastArrayList<*>) list else FastArrayList(list, receiverClass)
             sortedFiles.add(sortAndWriteToFile(list2 as MutableList<T>))
         }
 
@@ -108,14 +119,12 @@ class SorterPhase<T> constructor(
         if (files.size == 1)
             return files[0]
 
-        val states: List<FileState<T>> = files.map { FileState(it, serializer.createFileReader(it, defaultConfig.bufferSize)) }
+        val states: List<FileState<T>> = files.mapIndexed { i, file -> FileState(file, serializer.createFileReader(file, defaultConfig.bufferSize), i) }
 
         val output = Util.nextTempFileWithElemCount(defaultConfig.tempDirectory)
 
         var totalElems = files.sumOf { it.elemCount }
         var count = 0
-
-//        val groups = (totalElems + defaultConfig.maxItemsPerPart-1)/defaultConfig.maxItemsPerPart
 
 
         serializer.createFileWriter(output, defaultConfig.bufferSize).use { writer ->
@@ -131,7 +140,7 @@ class SorterPhase<T> constructor(
 
                 val numToDo = minOf(totalElems, defaultConfig.maxItemsPerPart)
 
-                val result = FastArrayList(numToDo, clazz)
+                val result = FastArrayList(numToDo, receiverClass)
 
 
                 for (i in 0 until numToDo) {
@@ -144,9 +153,9 @@ class SorterPhase<T> constructor(
 
                     if (state.currentValue != null)
                         q.offer(state)
-                    else
+                    else {
                         state.reader.close()
-
+                    }
 
                 }
 

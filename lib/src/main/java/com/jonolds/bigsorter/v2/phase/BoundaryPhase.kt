@@ -33,12 +33,8 @@ interface SinkPhase<T>: Receiver<T>, BoundaryPhase2 {
 
 }
 
-abstract class DualBoundaryPhase<P, C>:  SinkPhase<P>, SourcePhase<C> {
+interface DualBoundaryPhase<P, C>:  SinkPhase<P>, SourcePhase<C> {
 
-
-    override var child: Receiver<C>? = null
-
-    override var tag: String? = null
 }
 
 

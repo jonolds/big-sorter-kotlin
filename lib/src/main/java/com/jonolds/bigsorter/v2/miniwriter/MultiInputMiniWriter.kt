@@ -3,9 +3,10 @@ package com.jonolds.bigsorter.v2.miniwriter
 import com.jonolds.bigsorter.v2.phase.Sender
 import java.util.*
 
-class MultiInputMiniWriter<T>(
+class MultiInputMiniWriter<T> constructor(
     extras: List<Sender<T>>,
-    val writer: MiniWriter<T>
+    val writer: MiniWriter<T>,
+    override val receiverClass: Class<T>
 ) : MiniWriter<T>() {
 
     val stack = Stack<Sender<T>>()

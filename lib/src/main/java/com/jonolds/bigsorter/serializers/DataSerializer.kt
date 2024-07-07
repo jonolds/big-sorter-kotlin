@@ -5,7 +5,9 @@ import com.jonolds.bigsorter.WriterBS
 import java.io.*
 
 
-abstract class DataSerializer<T> : StreamSerializer<T> {
+abstract class DataSerializer<T>(
+	override val clazz: Class<T>
+) : StreamSerializer<T> {
 
 	abstract fun read(dis: DataInputStream): T?
 

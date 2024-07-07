@@ -10,6 +10,7 @@ interface Receiver<T>: Phase {
 
     var parent: Sender<T>?
 
+    val receiverClass: Class<T>
 
     fun getWriter(): MiniWriter<T>
 
@@ -27,6 +28,9 @@ class FileOutputPhase<P>(
     context: DatMapContext? = null,
 ): SinkPhase<P> {
 
+
+    override val receiverClass: Class<P> get() = parent!!.senderClass
+
     override var tag: String? = null
 
     override val context: DatMapContext by lazy { context ?: parent!!.context }
@@ -35,6 +39,6 @@ class FileOutputPhase<P>(
     override val filenames: List<String> get() = listOf(filename)
 
 
-    override fun getWriter(): MiniWriter<P> = channelWriterFactory.miniWriter(filename, defaultConfig.bufferSize)
+    override fun getWriter(): MiniWriter<P> = channelWriterFactory.miniWriter(filename, defaultConfig.bufferSize, receiverClass)
 
 }

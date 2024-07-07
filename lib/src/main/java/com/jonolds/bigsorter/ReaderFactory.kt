@@ -10,6 +10,7 @@ import java.nio.channels.FileChannel
 
 interface FileReaderFactory<T> {
 
+
 	fun createFileReader(file: File, bufferSize: Int = 8192): ReaderBS<T>
 
 	fun <S> mapper(mapper: (T) -> S): FileReaderFactory<S>
@@ -17,7 +18,7 @@ interface FileReaderFactory<T> {
 }
 
 
-fun interface ChannelReaderFactory<T>: FileReaderFactory<T> {
+interface ChannelReaderFactory<T>: FileReaderFactory<T> {
 
 	fun createChannelReader(inCh: FileChannel, bufferSize: Int?): ReaderBS<T>
 

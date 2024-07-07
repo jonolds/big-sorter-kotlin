@@ -1,6 +1,7 @@
 package com.jonolds.bigsorter
 
 import com.jonolds.bigsorter.Util.createOrReplaceWithCount
+import com.jonolds.bigsorter.Util.makeArray
 import com.jonolds.bigsorter.internal.Array2
 import com.jonolds.bigsorter.serializers.SerializerBS
 import java.io.File
@@ -75,7 +76,7 @@ class SorterBulk2<T>(
 		log("unique = $unique")
 
 
-		val list = Array2(serializer.makeArray(maxItemsPerPart))
+		val list = Array2(makeArray(maxItemsPerPart, clazz = serializer.clazz))
 
 
 		var currentCount = 0

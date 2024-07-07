@@ -11,6 +11,7 @@ import kotlin.collections.ArrayList
 abstract class MiniWriter<T>: Closeable {
 
 
+    abstract val receiverClass: Class<T>
 
 
     abstract fun writeBulk(list: List<T>)
@@ -23,6 +24,9 @@ abstract class MiniWriter<T>: Closeable {
         comparator: (lastValue: T, value: T) -> Boolean,
         combiningFunction: (lastValue: T, value: T) -> T,
     ): MiniWriter<T> = object : MiniWriter<T>() {
+
+
+        override val receiverClass: Class<T> = this@MiniWriter.receiverClass
 
         var lastValue: T? = null
 
@@ -79,12 +83,15 @@ fun <T> MiniWriter<T>.filter(
 
 
 fun <C, T> MiniWriter<C>.map(
+    receiverClass: Class<T>,
     mapper: (T) -> C
 ): MiniWriter<T> =
-    MapMiniWriter<T, C>(this, mapper)
+    MapMiniWriter<T, C>(this, receiverClass, mapper)
 
 
 fun <T> MiniWriter<T>.nonClosable(): MiniWriter<T> = object : MiniWriter<T>() {
+
+    override val receiverClass: Class<T> = this@nonClosable.receiverClass
 
     override fun writeBulk(list: List<T>) = this@nonClosable.writeBulk(list)
 
@@ -92,11 +99,13 @@ fun <T> MiniWriter<T>.nonClosable(): MiniWriter<T> = object : MiniWriter<T>() {
 }
 
 
-fun <T> ChannelWriterFactory<T>.miniWriter(filename: String, bufferSize: Int): MiniWriter<T> =
-    createFileWriter(File(filename).createOrReplace(), bufferSize).toMiniWriter()
+fun <T> ChannelWriterFactory<T>.miniWriter(filename: String, bufferSize: Int, receiverClass: Class<T>): MiniWriter<T> =
+    createFileWriter(File(filename).createOrReplace(), bufferSize).toMiniWriter(receiverClass)
 
 
-fun <T> WriterBS<T>.toMiniWriter(): MiniWriter<T> = object : MiniWriter<T>() {
+fun <T> WriterBS<T>.toMiniWriter(receiverClass: Class<T>): MiniWriter<T> = object : MiniWriter<T>() {
+
+    override val receiverClass: Class<T>  = receiverClass
 
     override fun writeBulk(list: List<T>) = this@toMiniWriter.writeBulk(list)
 

@@ -9,6 +9,8 @@ abstract class FilterPhaseAbstract<P>: ThruPhase<P, P>() {
     abstract val predicateFactory: () -> ((P)->Boolean)
 
 
+    override val senderClass: Class<P> get() = receiverClass
+
     override fun wrapChildWriter(childWriter: MiniWriter<P>): MiniWriter<P> =
         childWriter.filter(predicateFactory)
 
@@ -17,7 +19,8 @@ abstract class FilterPhaseAbstract<P>: ThruPhase<P, P>() {
 class FilterPhase<P>(
     override var parent: Sender<P>?,
     override val predicateFactory: () -> ((P)->Boolean),
-): FilterPhaseAbstract<P>()
+): FilterPhaseAbstract<P>() {
+}
 
 
 

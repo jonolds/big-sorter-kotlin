@@ -14,7 +14,7 @@ inline fun <reified T> DatMapContext.input(
     channelReaderFactory: ChannelReaderFactory<T>,
     file: String,
     vararg files: String,
-): FileInputPhase<T> = FileInputPhase(listOf(file) + files.toList(), channelReaderFactory, this)
+): FileInputPhase<T> = FileInputPhase(listOf(file) + files.toList(), channelReaderFactory, T::class.java, this)
 
 
 inline fun <reified T> DatMapContext.input2(
@@ -42,19 +42,19 @@ inline fun <reified T> Sender<T>.output(
 inline fun <reified A, reified B> Sender<A>.map2(
     noinline mapper: (A) -> B
 ): MapPhase<A, B> =
-    MapPhase(this, mapper).also{ child = it }
+    MapPhase(this, B::class.java, mapper).also{ child = it }
 
 
 inline fun <reified A, reified B> Sender<A>.mapWithContext(
     mapperFactory: () -> ((A) -> B)
 ): MapPhase<A, B> =
-    MapPhase(this, mapperFactory()).also{ child = it }
+    MapPhase(this, B::class.java, mapperFactory()).also{ child = it }
 
 
 inline fun <reified A, reified B, reified C> MapPhase<A, B>.map2(
     crossinline mapper: (B) -> C
 ): MapPhase<A, C> =
-    MapPhase(parent) { mapper(mapper(it)) }.also { parent!!.child = it }
+    MapPhase(parent, C::class.java) { mapper(mapper(it)) }.also { parent!!.child = it }
 
 
 
@@ -119,7 +119,7 @@ inline fun <reified T> Sender<T>.sort(
     comparator: Comparator<in T>,
     outputPath: String? = null,
 ): SorterPhase<T> =
-    SorterPhase(this, serializer, comparator, outputPath, this.context, T::class.java).also { child = it }
+    SorterPhase(this, serializer, comparator, outputPath, this.context).also { child = it }
 
 
 

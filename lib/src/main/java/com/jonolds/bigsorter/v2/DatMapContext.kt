@@ -8,7 +8,7 @@ import java.nio.file.Files
 class DatMapContext(
     maxFilesPerMerge: Int = 100,
     maxItemsPerPart: Int = 100000,
-    bufferSize: Int = 3_000_000,
+    bufferSize: Int = 4_000_0,
     debug: Boolean = false,
     deleteTempFiles: Boolean = true,
     tempDirectory: File = File(System.getProperty("java.io.tmpdir") + "/big-sorter")

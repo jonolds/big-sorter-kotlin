@@ -14,6 +14,7 @@ import java.nio.charset.Charset
 
 internal class CsvSerializer(private val format: CSVFormat, private val charset: Charset) : StreamSerializer<CSVRecord> {
 
+	override val clazz: Class<CSVRecord> = CSVRecord::class.java
 
 	override fun createStreamReader(inStr: InputStream): ReaderBS<CSVRecord> = object : ReaderBS<CSVRecord> {
 		var iter: Iterator<CSVRecord>? = null

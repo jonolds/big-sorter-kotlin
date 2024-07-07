@@ -1,54 +1,78 @@
 package com.jonolds.bigsorter.v2
 
-import com.jonolds.bigsorter.serializers.BinLineTempSerializer
-import com.jonolds.bigsorter.v2.phase.tag
-import java.lang.reflect.Array.newInstance
 
 
 fun main() {
 
-    val s = DatMapContext()
-        .input(BinLineTempSerializer(), "")
-        .map2 { it.toString() }
-        .map2 { it.toCharArray() }
-        .map2 { it.toString().toByteArray() }
-        .output("", BinLineTempSerializer())
-        .tag("test")
+    val ops = listOf(
+        MapTransf<Int, Double> { it + 2.0 },
+        MapTransf<Double, Float> { (it + 3).toFloat() },
+        FilterTransf<Float> { it > 10 }
+    )
 
+    val listFunc = combine<Int, Float>(ops)
 
-    val p: Array<in String> = Array<Any?>(3) { "null" } as Array<in String>
+    val list = listOf(20, 0, 11, 4)
 
+    val s = listFunc(list)
 
-    val temp = test(listOf("as", "ap"))
+    println(s)
 
-    println(test2(temp.arr as Array<String>))
 
 }
 
+typealias Func = (Any) -> Unit
 
-fun test2(arr: Array<String>) {
-    println(arr.contentToString())
-}
+inline fun <A, B> combine(ops: List<Transf<*, *>>): (List<A>) -> List<B> {
 
-class Temp<T>(
-    val clazz: Class<T>,
-    elems: List<T>
-) {
+    val result = ArrayList<B>()
+    val start: Func = { result.add(it as B) }
 
-    val arr: Array<T> = newInstance(clazz, 3) as Array<T>
 
-    init {
-        elems.forEachIndexed { i, t -> arr[i] = t }
+    val finalFunc = ops.reversed().fold(
+        initial = start,
+        operation = { acc, value ->
+            return@fold { a ->
+               value.getExecFunc(acc)(a)
+            }
+        }
+    )
+
+    return { list ->
+
+        for (elem in list)
+            finalFunc(elem as Any)
+        result
     }
 
 }
 
 
-inline fun <reified T>test(list: List<T>): Temp<*> {
-    return Temp(T::class.java, list)
+abstract class Transf<A, B> {
+
+    abstract fun  getExecFunc(nextAction: (Any) -> Unit): (Any) -> Unit
 }
 
+class MapTransf<A, B>(
+    val mapper: (A) -> B
+) : Transf<A, B>() {
 
+
+
+    override inline fun getExecFunc(crossinline nextAction: (Any) -> Unit): (Any) -> Unit = {
+        nextAction(mapper(it as A) as Any)
+    }
+}
+
+class FilterTransf<A>(
+    val predicate: (A) -> Boolean
+): Transf<A, A>() {
+
+    override inline fun getExecFunc(crossinline nextAction: (Any) -> Unit): (Any) -> Unit = {
+        if (predicate(it as A))
+            nextAction(it as Any)
+    }
+}
 
 
 

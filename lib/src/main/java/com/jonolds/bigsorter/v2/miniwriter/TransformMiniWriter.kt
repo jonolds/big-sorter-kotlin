@@ -3,14 +3,15 @@ package com.jonolds.bigsorter.v2.miniwriter
 import java.util.LinkedList
 
 abstract class TransformMiniWriter<T, C>(
-    val child: MiniWriter<C>
+    val child: MiniWriter<C>,
 ): MiniWriter<T>() {
 
+
+    abstract val senderClass: Class<C>
 
     abstract val action: (T) -> Unit
 
     var result: MutableList<C> = ArrayList()
-//    var result: MutableList<C> = LinkedList()
 
 
     override fun writeBulk(list: List<T>) {
@@ -26,8 +27,7 @@ abstract class TransformMiniWriter<T, C>(
         }
         else {
             child.writeBulk(result)
-            result = ArrayList()
-//            result = LinkedList()
+            result = ArrayList(result.size)
         }
     }
 
@@ -44,6 +44,10 @@ class FilterMiniWriter<T>(
     val predicate: (T) -> Boolean
 ): TransformMiniWriter<T, T>(child) {
 
+    override val receiverClass: Class<T> = child.receiverClass
+
+    override val senderClass: Class<T> = child.receiverClass
+
     override val action: (T) -> Unit =
         if (child is TransformMiniWriter<T, *>) { elem ->
             if(predicate(elem))
@@ -58,8 +62,11 @@ class FilterMiniWriter<T>(
 
 class MapMiniWriter<T, C>(
     child: MiniWriter<C>,
+    override val receiverClass: Class<T>,
     val mapper: (T) -> C
 ): TransformMiniWriter<T, C>(child) {
+
+    override val senderClass: Class<C> = child.receiverClass
 
 
     override val action: (T) -> Unit =

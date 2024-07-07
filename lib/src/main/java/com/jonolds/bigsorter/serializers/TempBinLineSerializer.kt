@@ -1,6 +1,7 @@
 package com.jonolds.bigsorter.serializers
 
 import com.jonolds.bigsorter.ReaderBS
+import com.jonolds.bigsorter.Util.N
 import com.jonolds.bigsorter.WriterBS
 import com.jonolds.bigsorter.internal.Array2
 import java.nio.ByteBuffer
@@ -13,6 +14,7 @@ class BinLineTempSerializer(
     val outBufferSize: Int = DEFAULT_BUFFER_SIZE
 ): ChannelSerializer<ByteArray> {
 
+	override val clazz: Class<ByteArray> = ByteArray::class.java
 
     override fun createChannelReader(inCh: FileChannel, bufferSize: Int?): ReaderBS<ByteArray> =
         BinLineReaderCh(inCh, bufferSize ?: inBufferSize)
@@ -21,7 +23,6 @@ class BinLineTempSerializer(
         TempBinLineWriterCh(outCh, bufferSize ?: outBufferSize)
 
 
-    override fun makeArray(size: Int): Array<ByteArray> = ByteArray(0).let { ba -> Array(size) { ba }}
 
 }
 
@@ -32,9 +33,7 @@ abstract class BinLineReaderChAbstract<T>(
 	val bufferSize: Int
 ): Reader2<T>  {
 
-	val buf = ByteBuffer.allocate(bufferSize)
-
-
+	val buf: ByteBuffer = ByteBuffer.allocate(bufferSize)
 	val arr: ByteArray = buf.array()
 
 
@@ -46,7 +45,6 @@ abstract class BinLineReaderChAbstract<T>(
 	init {
 		buf.limit(0)
 		fillUpBuf2()
-//		println("BinLineReader")
 	}
 
 	val chSize = inCh.size()
@@ -223,4 +221,3 @@ fun ByteArray.indexOfFirst(start: Int, limit: Int, b: Byte): Int? {
 typealias Writer2<T> = WriterBS<T>
 typealias Reader2<T> = ReaderBS<T>
 typealias Serializer<T> = SerializerBS<T>
-const val N: Byte = '\n'.code.toByte()

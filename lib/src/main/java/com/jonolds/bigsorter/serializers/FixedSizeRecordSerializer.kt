@@ -4,7 +4,7 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
 
-internal class FixedSizeRecordSerializer(private val size: Int) : DataSerializer<ByteArray>() {
+internal class FixedSizeRecordSerializer(private val size: Int) : DataSerializer<ByteArray>(ByteArray::class.java) {
 
 
 	override fun read(dis: DataInputStream): ByteArray {

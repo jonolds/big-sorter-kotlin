@@ -11,6 +11,8 @@ class PlexInPhase<Q>(
     val others: MutableList<Sender<Q>> = ArrayList()
 ) : ThruPhase<Q, Q>() {
 
+    override val senderClass: Class<Q> get() = receiverClass
+
     init {
         others.forEach { it.child = this }
     }
@@ -24,7 +26,7 @@ class PlexInPhase<Q>(
 
 
     override fun wrapChildWriter(childWriter: MiniWriter<Q>): MiniWriter<Q> =
-        MultiInputMiniWriter(others, childWriter)
+        MultiInputMiniWriter(others, childWriter, senderClass)
 
 }
 
@@ -35,6 +37,7 @@ class PlexOutPhase<Q>(
     val others: MutableList<Receiver<Q>> = ArrayList()
 ): ThruPhase<Q, Q>() {
 
+    override val senderClass: Class<Q> get() = receiverClass
 
     init {
         others.forEach { it.parent = this }
@@ -49,6 +52,8 @@ class PlexOutPhase<Q>(
 
 
     fun getOtherBuilder(): Sender<Q> = object : Sender<Q> {
+
+        override val senderClass: Class<Q> get() = this@PlexOutPhase.senderClass
 
         override var child: Receiver<Q>?
             get() = TODO("Not yet implemented")
@@ -68,7 +73,7 @@ class PlexOutPhase<Q>(
 
 
     override fun wrapChildWriter(childWriter: MiniWriter<Q>): MiniWriter<Q> =
-        MultiOutputMiniWriter(listOf(childWriter) + others.map { it.getWriter() })
+        MultiOutputMiniWriter(listOf(childWriter) + others.map { it.getWriter() }, senderClass)
 
 }
 

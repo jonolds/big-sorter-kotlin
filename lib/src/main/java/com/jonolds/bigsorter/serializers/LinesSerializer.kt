@@ -11,6 +11,7 @@ internal class LinesSerializer(
 	private val delimiter: LineDelimiter
 ) : StreamSerializer<String> {
 
+	override val clazz: Class<String> = String::class.java
 
 	override fun createStreamReader(inStr: InputStream): ReaderBS<String> = object : ReaderBS<String> {
 		var br: BufferedReader = BufferedReader(InputStreamReader(inStr, charset))

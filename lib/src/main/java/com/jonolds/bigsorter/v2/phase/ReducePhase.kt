@@ -9,6 +9,7 @@ class ReducePhase<P> (
     val combiningFunction: (lastValue: P, value: P) -> P,
 ): ThruPhase<P, P>() {
 
+    override val senderClass: Class<P> get() = receiverClass
 
     override fun wrapChildWriter(childWriter: MiniWriter<P>): MiniWriter<P> =
         childWriter.reduce(comparator, combiningFunction)

@@ -1,7 +1,8 @@
 package com.jonolds.bigsorter.v2.miniwriter
 
 class MultiOutputMiniWriter<T>(
-    val writers: List<MiniWriter<T>>
+    val writers: List<MiniWriter<T>>,
+    override val receiverClass: Class<T>
 ) : MiniWriter<T>() {
 
     override fun writeBulk(list: List<T>) {

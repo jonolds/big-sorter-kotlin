@@ -401,8 +401,8 @@ class FastArrayList<E> private constructor(
 
 		val elementData = elementData as Array<E?>
 		// clear to let GC do its work
-		for (i in 0 until size)
-			elementData.fill(null)
+		elementData.fill(null)
+//		for (i in 0 until size)
 //			elementData[i] = null
 
 		size = 0

@@ -5,7 +5,9 @@ import com.jonolds.bigsorter.WriterBS
 import java.io.*
 
 @Suppress("UNCHECKED_CAST")
-internal class JavaSerializer<T : Serializable?> : StreamSerializer<T> {
+internal class JavaSerializer<T : Serializable?>(
+	override val clazz: Class<T>
+) : StreamSerializer<T> {
 
 	override fun createStreamReader(inStr: InputStream): ReaderBS<T> {
 		val ois = ObjectInputStream(inStr)
@@ -41,7 +43,7 @@ internal class JavaSerializer<T : Serializable?> : StreamSerializer<T> {
 	}
 
 	companion object {
-		private val INSTANCE = JavaSerializer<Serializable>()
+		private val INSTANCE = JavaSerializer(Serializable::class.java)
 
         fun <T : Serializable?> instance(): JavaSerializer<T> = INSTANCE as JavaSerializer<T>
 	}

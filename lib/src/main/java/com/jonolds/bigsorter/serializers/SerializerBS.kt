@@ -12,8 +12,7 @@ import java.nio.charset.Charset
 
 interface SerializerBS<T> : FileReaderFactory<T>, FileWriterFactory<T> {
 
-	fun makeArray(size: Int): Array<T> =
-		TODO("Not yet implemented")
+	val clazz: Class<T>
 
 	companion object {
 
@@ -37,9 +36,10 @@ interface SerializerBS<T> : FileReaderFactory<T>, FileWriterFactory<T> {
 //		fun jsonArray(): SerializerBS<ObjectNode?> = JsonArraySerializer.INSTANCE
 
 		fun <T> dataSerializer2(
+			clazz: Class<T>,
 			reader: (DataInputStream) -> T,
 			writer: (DataOutputStream, T) -> Unit
-		): SerializerBS<T> = object : DataSerializer<T>() {
+		): SerializerBS<T> = object : DataSerializer<T>(clazz) {
 
 			override fun read(dis: DataInputStream): T? = try {
 				reader(dis)

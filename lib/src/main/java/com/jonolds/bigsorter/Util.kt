@@ -8,6 +8,26 @@ object Util {
 
 
 
+	const val N: Byte = '\n'.code.toByte()
+
+
+	@Suppress("UNCHECKED_CAST")
+	fun <T> makeNullableArray(capacity: Int, clazz: Class<T>): Array<T?> =
+		java.lang.reflect.Array.newInstance(clazz, capacity) as Array<T?>
+
+
+	@Suppress("UNCHECKED_CAST")
+	fun <T> makeArray(capacity: Int, clazz: Class<T>): Array<T> =
+		java.lang.reflect.Array.newInstance(clazz, capacity) as Array<T>
+
+
+	fun <T> makeArray(capacity: Int, clazz: Class<T>, initializer: (Int) -> T): Array<T> {
+		val result = makeArray(capacity, clazz)
+		for (i in 0 until capacity)
+			result[i] = initializer(i)
+		return result
+	}
+
 	fun close(c: Closeable) = try {
 		c.close()
 	} catch (e: IOException) {

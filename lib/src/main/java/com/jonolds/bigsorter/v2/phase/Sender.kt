@@ -2,10 +2,10 @@ package com.jonolds.bigsorter.v2.phase
 
 import com.jonolds.bigsorter.ChannelReaderFactory
 import com.jonolds.bigsorter.v2.DatMapContext
+import com.jonolds.bigsorter.v2.fastlist.FastArrayList
 import com.jonolds.bigsorter.v2.miniwriter.MiniWriter
 import com.jonolds.bigsorter.v2.pushFromFile
 import java.io.File
-import java.util.*
 import kotlin.collections.ArrayList
 
 
@@ -13,18 +13,11 @@ interface Sender<T>: Phase {
 
     var child: Receiver<T>?
 
+    val senderClass: Class<T>
+
     fun useFromBelow(miniWriter: MiniWriter<T>)
 
 }
-
-
-fun <T: Any, Z: Receiver<T>> Sender<T>.addChild(childToAdd: Z): Z {
-    child = childToAdd
-    return childToAdd
-}
-
-
-
 
 
 class MultiSourcePhase<P>(
@@ -52,7 +45,7 @@ interface FileSourcePhase<T>: SourcePhase<T> {
 
     override fun push(writeList: (List<T>) -> Unit) {
 
-        val result = ArrayList<T>(defaultConfig.maxItemsPerPart)
+        val result = FastArrayList<T>(defaultConfig.maxItemsPerPart, senderClass)
 
         for (file in filenames.map { File(it) }) {
             pushFromFile(file, channelReaderFactory, defaultConfig.bufferSize,
@@ -67,9 +60,12 @@ interface FileSourcePhase<T>: SourcePhase<T> {
 class FileInputPhase<T>(
     override val filenames: List<String>,
     override val channelReaderFactory: ChannelReaderFactory<T>,
-    override val context: DatMapContext,
-    override var child: Receiver<T>? = null,
+    override val senderClass: Class<T>,
+    override val context: DatMapContext
 ): FileSourcePhase<T> {
+
+
+    override var child: Receiver<T>? = null
 
 
     override var tag: String? = null

@@ -26,8 +26,10 @@ class FileState<T>(
 	path: String,
 	var reader: ReaderBS<T>,
 	var currentValue: T?,
+	var idx: Int = -1
 ): FileWithElemCount(path) {
 
-	constructor(file: File, reader: ReaderBS<T>): this(file.path, reader, reader.read())
+
+	constructor(file: File, reader: ReaderBS<T>, idx: Int = -1): this(file.path, reader, reader.read(), idx)
 
 }
