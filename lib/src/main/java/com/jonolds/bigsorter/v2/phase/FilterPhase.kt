@@ -4,7 +4,7 @@ import com.jonolds.bigsorter.v2.miniwriter.MiniWriter
 import com.jonolds.bigsorter.v2.miniwriter.filter
 
 
-abstract class FilterPhaseAbstract<P>: ThruPhase<P, P>() {
+abstract class FilterPhaseAbstract<P>: ThruComponent<P, P>() {
 
     abstract val predicateFactory: () -> ((P)->Boolean)
 
@@ -16,12 +16,17 @@ abstract class FilterPhaseAbstract<P>: ThruPhase<P, P>() {
 
 }
 
-class FilterPhase<P>(
+class FilterPhase<P> constructor(
     override var parent: Sender<P>?,
+    override val receiverClass: Class<P>,
     override val predicateFactory: () -> ((P)->Boolean),
-): FilterPhaseAbstract<P>() {
-}
+): FilterPhaseAbstract<P>()
 
+
+inline fun <reified P> filterPhase(
+    parent: Sender<P>?,
+    noinline predicateFactory: () -> ((P)->Boolean),
+): FilterPhase<P> = FilterPhase(parent, P::class.java, predicateFactory)
 
 
 

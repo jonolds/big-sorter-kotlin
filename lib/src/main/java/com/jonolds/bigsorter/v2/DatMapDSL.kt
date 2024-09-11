@@ -22,7 +22,7 @@ inline fun <reified T> DatMapContext.input2(
     vararg phases: Sender<T>
 ): Sender<T> =
     if (phases.isEmpty()) firstPhase
-    else PlexInPhase(firstPhase, phases.toMutableList())
+    else PlexInPhase(firstPhase, T::class.java, phases.toMutableList())
 
 
 
@@ -40,21 +40,24 @@ inline fun <reified T> Sender<T>.output(
 /* Map */
 
 inline fun <reified A, reified B> Sender<A>.map2(
-    noinline mapper: (A) -> B
+    crossinline mapper: (A) -> B
 ): MapPhase<A, B> =
-    MapPhase(this, B::class.java, mapper).also{ child = it }
+    mapPhase(this, mapper)
+        .also{ child = it }
 
 
 inline fun <reified A, reified B> Sender<A>.mapWithContext(
-    mapperFactory: () -> ((A) -> B)
-): MapPhase<A, B> =
-    MapPhase(this, B::class.java, mapperFactory()).also{ child = it }
+    crossinline mapperFactory: () -> ((A) -> B)
+): MapContextPhase<A, B> =
+    mapContextPhase(this) { mapperFactory() }
+        .also{ child = it }
 
 
-inline fun <reified A, reified B, reified C> MapPhase<A, B>.map2(
+inline fun <reified A, B, reified C> MapPhase<A, B>.map2(
     crossinline mapper: (B) -> C
 ): MapPhase<A, C> =
-    MapPhase(parent, C::class.java) { mapper(mapper(it)) }.also { parent!!.child = it }
+    mapPhase(parent) { mapper(this.mapper(it)) }
+        .also { parent!!.child = it }
 
 
 
@@ -63,13 +66,15 @@ inline fun <reified A, reified B, reified C> MapPhase<A, B>.map2(
 inline fun <reified A> Sender<A>.filter2(
     noinline predicateFactory: (A) -> Boolean
 ): FilterPhase<A> =
-    FilterPhase(this) { predicateFactory }.also{ child = it }
+    filterPhase(this) { predicateFactory }
+        .also{ child = it }
 
 
 inline fun <reified A> Sender<A>.filterWithContext(
     noinline predicateFactory: () -> ((A) -> Boolean)
 ): FilterPhase<A> =
-    FilterPhase(this, predicateFactory).also{ child = it }
+    filterPhase(this, predicateFactory)
+        .also{ child = it }
 
 
 
@@ -81,7 +86,8 @@ inline fun <reified P> Sender<P>.reduce(
     noinline comparator: (lastValue: P, value: P) -> Boolean,
     noinline combiningFunction: (lastValue: P, value: P) -> P,
 ): ReducePhase<P> =
-    ReducePhase(this, comparator, combiningFunction).also{ child = it }
+    ReducePhase(this, P::class.java, comparator, combiningFunction)
+        .also{ child = it }
 
 
 
@@ -90,20 +96,22 @@ inline fun <reified P> Sender<P>.reduce(
 /* Plex */
 
 inline fun <reified T> Sender<T>.plexIn(senderFactory: () -> Sender<T>): PlexInPhase<T> =
-    PlexInPhase(this, mutableListOf(senderFactory())).also{ child = it }
+    PlexInPhase(this, T::class.java, mutableListOf(senderFactory()))
+        .also{ child = it }
 
 inline fun <reified T> PlexInPhase<T>.plexIn(senderFactory: (context: DatMapContext) -> Sender<T>): PlexInPhase<T> =
     addOther(senderFactory(context))
 
 inline fun <reified T, reified U> Sender<T>.plexOut(noinline sinkFactory: Sender<T>.() -> SinkPhase<U>): PlexOutPhase<T> {
-    val plex = PlexOutPhase(this, mutableListOf())
+    val plex = PlexOutPhase(this, T::class.java, mutableListOf())
         .also{ child = it }
     return plex.plexOut2(sinkFactory)
-
 }
 
 inline fun <reified T, reified U> PlexOutPhase<T>.plexOut2(sinkFactory: Sender<T>.() -> SinkPhase<U>): PlexOutPhase<T> {
-    sinkFactory(getOtherBuilder())
+    val handle = PlexOutHandle<T>(this)
+    sinkFactory(handle)
+    handle.mergeParentChild()
     return this
 }
 

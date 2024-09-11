@@ -67,8 +67,10 @@ class SorterPhase<T> constructor(
 
 
         override fun writeBulk(list: List<T>) {
-            val list2 = if (list is FastArrayList<*>) list else FastArrayList(list, receiverClass)
-            sortedFiles.add(sortAndWriteToFile(list2 as MutableList<T>))
+            if (list is FastArrayList<T>)
+                sortedFiles.add(sortAndWriteToFile(list))
+            else
+                sortedFiles.add(sortAndWriteToFile(FastArrayList(list, receiverClass)))
         }
 
         override fun close() {
@@ -197,18 +199,13 @@ class SorterPhase<T> constructor(
         return output
     }
 
-    private fun sortAndWriteToFile(list: MutableList<T>): FileWithElemCount {
+    private fun sortAndWriteToFile(list: FastArrayList<T>): FileWithElemCount {
         val file = context.nextTempFileWithElemCount(defaultConfig.tempDirectory, "-partA", list.size)
 
         val time = measureTime {
 
             //TODO Fix parallel sort
-            val sorted = if (initialSortInParallel) {
-                if (list is FastArrayList<T>)
-                    list.parallelSort(comparator)
-                else
-                    list.stream().parallel().sorted(comparator).toList()
-            }
+            val sorted = if (initialSortInParallel) list.parallelSort(comparator)
                 else list.sortedWith(comparator)
 
             writeToFileBulk(sorted, file)

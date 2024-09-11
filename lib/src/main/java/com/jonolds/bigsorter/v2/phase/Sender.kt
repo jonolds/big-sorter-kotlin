@@ -17,6 +17,11 @@ interface Sender<T>: Phase {
 
     fun useFromBelow(miniWriter: MiniWriter<T>)
 
+    fun setChild(newChild: Receiver<T>) {
+        this.child = newChild
+        newChild.parent = this
+    }
+
 }
 
 

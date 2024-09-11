@@ -8,10 +8,11 @@ import com.jonolds.bigsorter.v2.miniwriter.MultiOutputMiniWriter
 
 class PlexInPhase<Q>(
     override var parent: Sender<Q>?,
+    override val receiverClass: Class<Q>,
     val others: MutableList<Sender<Q>> = ArrayList()
-) : ThruPhase<Q, Q>() {
+) : ThruComponent<Q, Q>() {
 
-    override val senderClass: Class<Q> get() = receiverClass
+    override val senderClass: Class<Q> = receiverClass
 
     init {
         others.forEach { it.child = this }
@@ -19,8 +20,8 @@ class PlexInPhase<Q>(
 
 
     fun addOther(other: Sender<Q>): PlexInPhase<Q> {
-        other.child = this
         others.add(other)
+        other.child = this
         return this
     }
 
@@ -34,8 +35,9 @@ class PlexInPhase<Q>(
 
 class PlexOutPhase<Q>(
     override var parent: Sender<Q>?,
+    override val receiverClass: Class<Q>,
     val others: MutableList<Receiver<Q>> = ArrayList()
-): ThruPhase<Q, Q>() {
+): ThruComponent<Q, Q>() {
 
     override val senderClass: Class<Q> get() = receiverClass
 
@@ -44,36 +46,37 @@ class PlexOutPhase<Q>(
     }
 
 
-    fun addOther(other: Receiver<Q>): PlexOutPhase<Q> {
-        other.parent = this
-        others.add(other)
-        return this
-    }
-
-
-    fun getOtherBuilder(): Sender<Q> = object : Sender<Q> {
-
-        override val senderClass: Class<Q> get() = this@PlexOutPhase.senderClass
-
-        override var child: Receiver<Q>?
-            get() = TODO("Not yet implemented")
-            set(value) {
-                addOther(value!!)
-            }
-
-        override fun useFromBelow(miniWriter: MiniWriter<Q>) = TODO("Not yet implemented")
-
-        override val context: DatMapContext get() = this@PlexOutPhase.context
-
-        override var tag: String?
-            get() = this@PlexOutPhase.tag
-            set(value) { value?.let { this@PlexOutPhase.tag(it) } }
-
-    }
-
-
     override fun wrapChildWriter(childWriter: MiniWriter<Q>): MiniWriter<Q> =
         MultiOutputMiniWriter(listOf(childWriter) + others.map { it.getWriter() }, senderClass)
+
+}
+
+
+class PlexOutHandle<Q>(
+    private val plexPhase: PlexOutPhase<Q>
+) : Sender<Q>, Receiver<Q> {
+
+    override var parent: Sender<Q>? = plexPhase
+
+    override val senderClass: Class<Q> = parent!!.senderClass
+
+    override val receiverClass: Class<Q> = parent!!.senderClass
+
+    override var child: Receiver<Q>? = null
+
+    override val context: DatMapContext = parent!!.context
+
+    override var tag: String? = null
+
+
+    fun mergeParentChild() {
+        plexPhase.others.add(child!!)
+        child!!.parent = plexPhase
+    }
+
+
+    override fun getWriter(): MiniWriter<Q> = TODO("Not yet implemented")
+    override fun useFromBelow(miniWriter: MiniWriter<Q>) = TODO("Not yet implemented")
 
 }
 

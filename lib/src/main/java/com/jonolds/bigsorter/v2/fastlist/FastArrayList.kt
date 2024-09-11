@@ -103,7 +103,8 @@ class FastArrayList<E> private constructor(
 			ensureExplicitCapacity(minCapacity)
 	}
 
-	private fun ensureCapacityInternal(minCapacity: Int) =
+	@PublishedApi
+	internal fun ensureCapacityInternal(minCapacity: Int) =
 		ensureExplicitCapacity(calculateCapacity(elementData, minCapacity))
 
 	private fun ensureExplicitCapacity(minCapacity: Int) {
@@ -266,7 +267,7 @@ class FastArrayList<E> private constructor(
 	 * @return the element at the specified position in this list
 	 * @throws IndexOutOfBoundsException {@inheritDoc}
 	 */
-	override operator fun get(index: Int): E {
+	override inline operator fun get(index: Int): E {
 //		rangeCheck(index)
 		return elementData(index)
 	}
@@ -280,9 +281,8 @@ class FastArrayList<E> private constructor(
 	 * @return the element previously at the specified position
 	 * @throws IndexOutOfBoundsException {@inheritDoc}
 	 */
-	override operator fun set(index: Int, element: E): E {
+	override inline operator fun set(index: Int, element: E): E {
 //		rangeCheck(index)
-
 		val oldValue = elementData(index)
 		elementData[index] = element
 		return oldValue
@@ -294,7 +294,7 @@ class FastArrayList<E> private constructor(
 	 * @param element element to be appended to this list
 	 * @return <tt>true</tt> (as specified by [Collection##add])
 	 */
-	override fun add(element: E): Boolean {
+	override inline fun add(element: E): Boolean {
 		ensureCapacityInternal(size + 1) // Increments modCount!!
 		elementData[size++] = element
 		return true
@@ -309,7 +309,7 @@ class FastArrayList<E> private constructor(
 	 * @param element element to be inserted
 	 * @throws IndexOutOfBoundsException {@inheritDoc}
 	 */
-	override fun add(index: Int, element: E) {
+	override inline fun add(index: Int, element: E) {
 		rangeCheckForAdd(index)
 
 		ensureCapacityInternal(size + 1) // Increments modCount!!
@@ -510,7 +510,8 @@ class FastArrayList<E> private constructor(
 	/**
 	 * A version of rangeCheck used by add and addAll.
 	 */
-	private fun rangeCheckForAdd(index: Int) {
+	@PublishedApi
+	internal fun rangeCheckForAdd(index: Int) {
 		if (index > size || index < 0) throw IndexOutOfBoundsException(outOfBoundsMsg(index))
 	}
 

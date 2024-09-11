@@ -6,7 +6,6 @@ import com.jonolds.bigsorter.v2.miniwriter.MiniWriter
 
 abstract class ThruPhase<P, C>: Receiver<P>, Sender<C> {
 
-    override val receiverClass: Class<P> get() = parent!!.senderClass
 
     override var child: Receiver<C>? = null
 
@@ -22,9 +21,14 @@ abstract class ThruPhase<P, C>: Receiver<P>, Sender<C> {
         parent!!.useFromBelow(wrapChildWriter(miniWriter))
 
 
-    override fun getWriter(): MiniWriter<P> = wrapChildWriter(child!!.getWriter())
+    override fun getWriter(): MiniWriter<P> {
+        return wrapChildWriter(child!!.getWriter())
+    }
 
 }
+
+
+abstract class ThruComponent<P, C>: ThruPhase<P, C>()
 
 
 

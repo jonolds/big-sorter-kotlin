@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     id("org.jetbrains.kotlin.jvm") version "2.0.0"
     id("java-library")
@@ -47,6 +49,12 @@ java {
 
     withSourcesJar()
 //    withJavadocJar()
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions {
+        freeCompilerArgs.add("-Xcontext-receivers")
+    }
 }
 
 kotlin {

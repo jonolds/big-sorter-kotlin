@@ -33,9 +33,6 @@ interface SinkPhase<T>: Receiver<T>, BoundaryPhase2 {
 
 }
 
-interface DualBoundaryPhase<P, C>:  SinkPhase<P>, SourcePhase<C> {
-
-}
-
+interface DualBoundaryPhase<P, C>:  SinkPhase<P>, SourcePhase<C>
 
 
